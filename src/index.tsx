@@ -751,19 +751,33 @@ export default function PlayerLoadMonitorApp() {
 
   loadPlayers();
 }, []);
-  const addPlayer = () => {
-    if (!newPlayer.name.trim()) return;
-    const nextId = players.length ? Math.max(...players.map((p) => p.id)) + 1 : 1;
-    const payload = {
-      id: nextId,
-      name: newPlayer.name.trim(),
-      position: newPlayer.position.trim() || "TBD",
-    };
-    setPlayers((prev) => [...prev, payload]);
-    setNewPlayer({ name: "", position: "" });
-    setSelectedPlayerId(nextId);
-    setHistoryPlayerId(nextId);
+const addPlayer = async () => {
+  if (!newPlayer.name.trim()) return;
+
+  const payload = {
+    name: newPlayer.name.trim(),
+    position: newPlayer.position.trim() || "TBD",
+    role: "player",
   };
+
+  const { data, error } = await supabase
+    .from("players")
+    .insert([payload])
+    .select();
+
+  if (error) {
+    console.error("ADD PLAYER ERROR:", error);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    const createdPlayer = data[0];
+    setPlayers((prev) => [...prev, createdPlayer]);
+    setNewPlayer({ name: "", position: "" });
+    setSelectedPlayerId(createdPlayer.id);
+    setHistoryPlayerId(createdPlayer.id);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.15),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.10),_transparent_20%),linear-gradient(180deg,_#020617,_#0f172a)] text-white">
