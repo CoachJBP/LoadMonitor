@@ -11,7 +11,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { supabase } from "./supabase";
+import { supabase } from "./src/supabase";
 const LOAD_WINDOWS = [
   { label: "7d", days: 7 },
   { label: "15d", days: 15 },
