@@ -711,7 +711,7 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
 
 export default function PlayerLoadMonitorApp() {
   const [mode, setMode] = useState("staff");
-  const [players, setPlayers] = useLocalState("ppl-players-v1", DEFAULT_PLAYERS);
+  const [players, setPlayers] = useState(DEFAULT_PLAYERS);
   const [selectedPlayerId, setSelectedPlayerId] = useState(1);
   const [historyPlayerId, setHistoryPlayerId] = useState(1);
   const [wellnessEntries, setWellnessEntries] = useLocalState("ppl-wellness-v1", seedWellness);
@@ -729,6 +729,27 @@ export default function PlayerLoadMonitorApp() {
   };
 
   testSupabase();
+}, []);
+  useEffect(() => {
+  const loadPlayers = async () => {
+    const { data, error } = await supabase
+      .from("players")
+      .select("id, name, position, role")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("LOAD PLAYERS ERROR:", error);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      setPlayers(data);
+      setSelectedPlayerId(data[0].id);
+      setHistoryPlayerId(data[0].id);
+    }
+  };
+
+  loadPlayers();
 }, []);
   const addPlayer = () => {
     if (!newPlayer.name.trim()) return;
