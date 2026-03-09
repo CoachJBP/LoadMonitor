@@ -721,6 +721,15 @@ export default function PlayerLoadMonitorApp() {
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
 
+  useEffect(() => {
+  const testSupabase = async () => {
+    const { data, error } = await supabase.from("players").select("*");
+    console.log("SUPABASE PLAYERS:", data);
+    console.log("SUPABASE ERROR:", error);
+  };
+
+  testSupabase();
+}, []);
   const addPlayer = () => {
     if (!newPlayer.name.trim()) return;
     const nextId = players.length ? Math.max(...players.map((p) => p.id)) + 1 : 1;
