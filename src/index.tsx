@@ -733,7 +733,7 @@ export default function PlayerLoadMonitorApp() {
   const [players, setPlayers] = useState(DEFAULT_PLAYERS);
   const [selectedPlayerId, setSelectedPlayerId] = useState(1);
   const [historyPlayerId, setHistoryPlayerId] = useState(1);
-  const [wellnessEntries, setWellnessEntries] = useLocalState("ppl-wellness-v1", seedWellness);
+  const [wellnessEntries, setWellnessEntries] = useState(seedWellness);
   const [sessionEntries, setSessionEntries] = useLocalState("ppl-session-v1", seedSessions);
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "" });
 
