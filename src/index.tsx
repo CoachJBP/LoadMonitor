@@ -770,6 +770,37 @@ export default function PlayerLoadMonitorApp() {
 
   loadPlayers();
 }, []);
+  useEffect(() => {
+  const loadWellnessEntries = async () => {
+    const { data, error } = await supabase
+      .from("wellness_entries")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("LOAD WELLNESS ERROR:", error);
+      return;
+    }
+
+    if (data) {
+      const mapped = data.map((entry) => ({
+        playerId: entry.player_id,
+        date: entry.entry_date,
+        sleep: entry.sleep,
+        fatigue: entry.fatigue,
+        soreness: entry.soreness,
+        stress: entry.stress,
+        mood: entry.mood,
+        freshness: entry.freshness,
+        comment: entry.comment || "",
+      }));
+
+      setWellnessEntries(mapped);
+    }
+  };
+
+  loadWellnessEntries();
+}, []);
 const addPlayer = async () => {
   if (!newPlayer.name.trim()) return;
 
