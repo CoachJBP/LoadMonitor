@@ -778,7 +778,11 @@ export default function PlayerLoadMonitorApp() {
             <label className="text-sm text-slate-300">Selected player</label>
             <select
               value={selectedPlayerId}
-              onChange={(e) => setSelectedPlayerId(Number(e.target.value))}
+              onChange={(e) => {
+                const nextId = Number(e.target.value);
+                setSelectedPlayerId(nextId);
+                setHistoryPlayerId(nextId);
+              }}
               className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none"
             >
               {players.map((p) => (
