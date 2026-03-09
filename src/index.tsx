@@ -1,0 +1,835 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { Activity, AlertTriangle, BarChart3, ClipboardList, HeartPulse, Moon, Timer, Users } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
+
+const LOAD_WINDOWS = [
+  { label: "7d", days: 7 },
+  { label: "15d", days: 15 },
+  { label: "30d", days: 30 },
+];
+
+const ATTENDANCE_OPTIONS = ["Present", "Absent", "Modified", "Rehab", "Off", "Not Selected"];
+const SESSION_TYPES = ["Training", "Game", "Rehab", "Gym"];
+const BODY_CHECK_OPTIONS = ["None", "Minor", "Moderate", "High"];
+
+const DEFAULT_PLAYERS = [
+  { id: 1, name: "A. Silva", position: "GK" },
+  { id: 2, name: "M. Traoré", position: "CB" },
+  { id: 3, name: "L. Morel", position: "CB" },
+  { id: 4, name: "J. Costa", position: "FB" },
+  { id: 5, name: "R. Kane", position: "6" },
+  { id: 6, name: "T. Martin", position: "8" },
+  { id: 7, name: "D. Perez", position: "10" },
+  { id: 8, name: "K. Ibrahim", position: "W" },
+  { id: 9, name: "S. Novak", position: "9" },
+];
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const daysAgoKey = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+};
+const withinLastDays = (dateStr, days) => dateStr >= daysAgoKey(days - 1);
+
+const scoreReadiness = (w) => {
+  if (!w) return null;
+  const sleep = Number(w.sleep || 0);
+  const mood = Number(w.mood || 0);
+  const freshness = Number(w.freshness || 0);
+  const fatigue = 6 - Number(w.fatigue || 1);
+  const soreness = 6 - Number(w.soreness || 1);
+  const stress = 6 - Number(w.stress || 1);
+  return Math.round(((sleep + mood + freshness + fatigue + soreness + stress) / 30) * 100);
+};
+
+const sumLoads = (entries, playerId, days) =>
+  entries
+    .filter((e) => e.playerId === playerId && withinLastDays(e.date, days))
+    .reduce((sum, e) => sum + Number(e.load || 0), 0);
+
+const attendanceSummary = (entries, playerId, days = 30) => {
+  const relevant = entries.filter((e) => e.playerId === playerId && withinLastDays(e.date, days));
+  const counts = { Present: 0, Absent: 0, Modified: 0, Rehab: 0, Off: 0, "Not Selected": 0 };
+  relevant.forEach((e) => {
+    counts[e.attendance] = (counts[e.attendance] || 0) + 1;
+  });
+  const attended = (counts.Present || 0) + (counts.Modified || 0) + (counts.Rehab || 0);
+  const total = relevant.length;
+  return {
+    counts,
+    total,
+    attended,
+    percent: total ? Math.round((attended / total) * 100) : 0,
+  };
+};
+
+const cn = (...classes) => classes.filter(Boolean).join(" ");
+
+const seedSessions = [
+  { date: "2026-03-04", playerId: 1, duration: 75, rpe: 5, attendance: "Present", sessionType: "Training", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-04", playerId: 2, duration: 75, rpe: 7, attendance: "Present", sessionType: "Training", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-04", playerId: 3, duration: 75, rpe: 6, attendance: "Present", sessionType: "Training", bodyCheck: "Minor", painArea: "Adductors", comment: "" },
+  { date: "2026-03-05", playerId: 1, duration: 80, rpe: 6, attendance: "Present", sessionType: "Training", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-05", playerId: 2, duration: 80, rpe: 8, attendance: "Present", sessionType: "Training", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-05", playerId: 3, duration: 80, rpe: 7, attendance: "Present", sessionType: "Training", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-06", playerId: 1, duration: 65, rpe: 4, attendance: "Present", sessionType: "Gym", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-06", playerId: 2, duration: 65, rpe: 6, attendance: "Present", sessionType: "Gym", bodyCheck: "Minor", painArea: "Hamstring", comment: "" },
+  { date: "2026-03-06", playerId: 3, duration: 65, rpe: 6, attendance: "Present", sessionType: "Gym", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-07", playerId: 1, duration: 90, rpe: 6, attendance: "Present", sessionType: "Game", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-07", playerId: 2, duration: 90, rpe: 9, attendance: "Present", sessionType: "Game", bodyCheck: "Moderate", painArea: "Calf", comment: "" },
+  { date: "2026-03-07", playerId: 3, duration: 90, rpe: 8, attendance: "Present", sessionType: "Game", bodyCheck: "Minor", painArea: "Knee", comment: "" },
+  { date: "2026-03-08", playerId: 1, duration: 40, rpe: 3, attendance: "Modified", sessionType: "Rehab", bodyCheck: "Minor", painArea: "Groin", comment: "" },
+  { date: "2026-03-08", playerId: 2, duration: 40, rpe: 4, attendance: "Present", sessionType: "Rehab", bodyCheck: "None", painArea: "", comment: "" },
+  { date: "2026-03-08", playerId: 3, duration: 40, rpe: 3, attendance: "Present", sessionType: "Rehab", bodyCheck: "None", painArea: "", comment: "" },
+].map((s) => ({ ...s, load: s.duration * s.rpe }));
+
+const seedWellness = [
+  { date: todayKey(), playerId: 1, sleep: 4, fatigue: 2, soreness: 2, stress: 2, mood: 4, freshness: 4, comment: "Feeling good" },
+  { date: todayKey(), playerId: 2, sleep: 3, fatigue: 4, soreness: 4, stress: 3, mood: 3, freshness: 2, comment: "Heavy legs" },
+  { date: todayKey(), playerId: 3, sleep: 5, fatigue: 2, soreness: 2, stress: 1, mood: 5, freshness: 5, comment: "Ready" },
+];
+
+function useLocalState(key, initialValue) {
+  const [state, setState] = useState(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : initialValue;
+    } catch {
+      return initialValue;
+    }
+  });
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(state));
+  }, [key, state]);
+  return [state, setState];
+}
+
+function SectionCard({ title, icon: Icon, subtitle, children, right }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/20 backdrop-blur">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-1 flex items-center gap-2 text-white">
+            <Icon className="h-5 w-5" />
+            <h3 className="text-lg font-semibold">{title}</h3>
+          </div>
+          {subtitle && <p className="text-sm text-slate-300">{subtitle}</p>}
+        </div>
+        {right}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function StatCard({ label, value, hint, tone = "default", icon: Icon }) {
+  const toneMap = {
+    default: "from-slate-800 to-slate-900 border-white/10",
+    green: "from-emerald-900/50 to-slate-900 border-emerald-400/20",
+    amber: "from-amber-900/40 to-slate-900 border-amber-400/20",
+    red: "from-red-900/40 to-slate-900 border-red-400/20",
+    blue: "from-sky-900/40 to-slate-900 border-sky-400/20",
+  };
+  return (
+    <div className={cn("rounded-3xl border bg-gradient-to-br p-4", toneMap[tone])}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm text-slate-300">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-white">{value}</p>
+          {hint && <p className="mt-2 text-xs text-slate-400">{hint}</p>}
+        </div>
+        {Icon && <Icon className="h-5 w-5 text-slate-300" />}
+      </div>
+    </div>
+  );
+}
+
+function RangeField({ label, value, onChange, lowBad = false, leftLabel = "Low", rightLabel = "High", min = 1, max = 5, showOutOf = true }) {
+  const numeric = Number(value);
+  const midpoint = Math.ceil((min + max) / 2);
+  const lowThreshold = min + 1;
+  const highThreshold = max - 1;
+  const color = lowBad
+    ? numeric <= lowThreshold
+      ? "bg-red-500"
+      : numeric < highThreshold
+        ? "bg-amber-400"
+        : "bg-emerald-500"
+    : numeric >= highThreshold
+      ? "bg-red-500"
+      : numeric >= midpoint
+        ? "bg-amber-400"
+        : "bg-emerald-500";
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between text-sm text-slate-200">
+        <span>{label}</span>
+        <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold text-slate-950", color)}>
+          {value}{showOutOf ? `/${max}` : ""}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step="1"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-white"
+      />
+      <div className="mt-1 flex justify-between text-xs text-slate-400">
+        <span>{leftLabel}</span>
+        <span>{rightLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+function PlayerForm({ selectedPlayer, wellnessEntries, sessionEntries, setWellnessEntries, setSessionEntries }) {
+  const [wellness, setWellness] = useState({ sleep: 4, fatigue: 2, soreness: 2, stress: 2, mood: 4, freshness: 4, comment: "" });
+  const [rpe, setRpe] = useState({ duration: 0, rpe: 6, comment: "", bodyCheck: "None", painArea: "", attendance: "Present", sessionType: "Training" });
+
+  useEffect(() => {
+    const today = todayKey();
+    const w = wellnessEntries.find((x) => x.playerId === selectedPlayer.id && x.date === today);
+    if (w) setWellness(w);
+    else setWellness({ sleep: 4, fatigue: 2, soreness: 2, stress: 2, mood: 4, freshness: 4, comment: "" });
+
+    const s = sessionEntries.find((x) => x.playerId === selectedPlayer.id && x.date === today);
+    if (s) {
+      setRpe({
+        duration: s.duration || 0,
+        rpe: s.rpe || 6,
+        comment: s.comment || "",
+        bodyCheck: s.bodyCheck || "None",
+        painArea: s.painArea || "",
+        attendance: s.attendance || "Present",
+        sessionType: s.sessionType || "Training",
+      });
+    } else {
+      setRpe({ duration: 0, rpe: 6, comment: "", bodyCheck: "None", painArea: "", attendance: "Present", sessionType: "Training" });
+    }
+  }, [selectedPlayer, wellnessEntries, sessionEntries]);
+
+  const readiness = scoreReadiness(wellness);
+  const isBlocked = ["Absent", "Off", "Not Selected"].includes(rpe.attendance);
+
+  const saveWellness = () => {
+    const today = todayKey();
+    const payload = { ...wellness, playerId: selectedPlayer.id, date: today };
+    setWellnessEntries((prev) => {
+      const filtered = prev.filter((x) => !(x.playerId === selectedPlayer.id && x.date === today));
+      return [...filtered, payload];
+    });
+  };
+
+  const saveRpe = () => {
+    if (isBlocked) return;
+    const today = todayKey();
+    const payload = {
+      ...rpe,
+      playerId: selectedPlayer.id,
+      date: today,
+      load: Number(rpe.duration) * Number(rpe.rpe),
+      painArea: rpe.bodyCheck === "None" ? "" : rpe.painArea,
+    };
+    setSessionEntries((prev) => {
+      const filtered = prev.filter((x) => !(x.playerId === selectedPlayer.id && x.date === today));
+      return [...filtered, payload];
+    });
+  };
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-2">
+      <SectionCard
+        title="Pre-Training Wellness"
+        icon={HeartPulse}
+        subtitle={`Quick readiness check for ${selectedPlayer.name}`}
+        right={<div className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-slate-900">Readiness {readiness ?? "--"}%</div>}
+      >
+        <div className="grid gap-4">
+          <RangeField label="Sleep quality" value={wellness.sleep} onChange={(v) => setWellness({ ...wellness, sleep: v })} lowBad />
+          <RangeField label="Fatigue" value={wellness.fatigue} onChange={(v) => setWellness({ ...wellness, fatigue: v })} />
+          <RangeField label="Muscle soreness" value={wellness.soreness} onChange={(v) => setWellness({ ...wellness, soreness: v })} />
+          <RangeField label="Stress" value={wellness.stress} onChange={(v) => setWellness({ ...wellness, stress: v })} />
+          <RangeField label="Mood" value={wellness.mood} onChange={(v) => setWellness({ ...wellness, mood: v })} lowBad />
+          <RangeField label="Freshness" value={wellness.freshness} onChange={(v) => setWellness({ ...wellness, freshness: v })} lowBad />
+          <textarea
+            value={wellness.comment || ""}
+            onChange={(e) => setWellness({ ...wellness, comment: e.target.value })}
+            placeholder="Injury / pain comment"
+            className="min-h-[96px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+          />
+          <button onClick={saveWellness} className="rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
+            Save wellness check
+          </button>
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Post-Training RPE"
+        icon={ClipboardList}
+        subtitle={isBlocked ? `${selectedPlayer.name} is marked as ${rpe.attendance} for today` : `Session type: ${rpe.sessionType} • Duration: ${rpe.duration || 0} min`}
+        right={<div className="rounded-full bg-sky-400 px-3 py-1 text-sm font-semibold text-slate-950">Load {Number(rpe.duration || 0) * Number(rpe.rpe || 0)}</div>}
+      >
+        {isBlocked ? (
+          <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4 text-sm text-slate-300">
+            This player does not need to submit an RPE today because the admin marked the attendance status as <span className="font-semibold text-white">{rpe.attendance}</span>.
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+              <p className="text-sm font-semibold text-white">RPE Scale Guide</p>
+              <div className="mt-3 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
+                <p>0–1 = Super Light</p>
+                <p>2–3 = Light</p>
+                <p>4–5 = Moderate / Somewhat Hard</p>
+                <p>6–7 = High / Vigorous</p>
+                <p>8–9 = Very Hard</p>
+                <p>10 = Maximum Effort</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4 text-sm text-slate-300">
+              Admin-controlled session setup: <span className="font-semibold text-white">{rpe.sessionType}</span> • <span className="font-semibold text-white">{rpe.duration || 0} minutes</span>
+            </div>
+            <RangeField
+              label="Session RPE"
+              value={rpe.rpe}
+              onChange={(v) => setRpe({ ...rpe, rpe: v })}
+              min={1}
+              max={10}
+              lowBad
+              leftLabel="Super Light"
+              rightLabel="Maximum"
+            />
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+              <p className="text-sm font-semibold text-white">Body Check</p>
+              <p className="mt-1 text-sm text-slate-300">Body check helps the staff monitor muscle soreness or pain after training or game.</p>
+              <div className="mt-4 grid gap-2 md:grid-cols-4">
+                {BODY_CHECK_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setRpe({ ...rpe, bodyCheck: option, painArea: option === "None" ? "" : rpe.painArea })}
+                    className={cn(
+                      "rounded-2xl border px-3 py-3 text-sm font-medium transition",
+                      rpe.bodyCheck === option
+                        ? "border-sky-300 bg-sky-300 text-slate-950"
+                        : "border-white/10 bg-slate-950/60 text-white hover:bg-white/10"
+                    )}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {rpe.bodyCheck !== "None" && (
+              <textarea
+                value={rpe.painArea || ""}
+                onChange={(e) => setRpe({ ...rpe, painArea: e.target.value })}
+                placeholder="If you are experiencing pain, please specify the area"
+                className="min-h-[96px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+              />
+            )}
+            <textarea
+              value={rpe.comment || ""}
+              onChange={(e) => setRpe({ ...rpe, comment: e.target.value })}
+              placeholder="Optional comment"
+              className="min-h-[96px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+            />
+            <button onClick={saveRpe} className="rounded-2xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
+              Save RPE entry
+            </button>
+          </div>
+        )}
+      </SectionCard>
+    </div>
+  );
+}
+
+function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
+  const [sessionDate, setSessionDate] = useState(todayKey());
+  const [sessionType, setSessionType] = useState("Training");
+  const [duration, setDuration] = useState(75);
+  const [attendanceMap, setAttendanceMap] = useState({});
+
+  useEffect(() => {
+    const seeded = {};
+    players.forEach((player) => {
+      const existing = sessionEntries.find((entry) => entry.playerId === player.id && entry.date === sessionDate);
+      seeded[player.id] = existing?.attendance || "Present";
+    });
+    setAttendanceMap(seeded);
+  }, [players, sessionDate, sessionEntries]);
+
+  const saveSessionSetup = () => {
+    const payload = players.map((player) => {
+      const existing = sessionEntries.find((entry) => entry.playerId === player.id && entry.date === sessionDate);
+      const attendance = attendanceMap[player.id] || "Present";
+      const allowed = ["Present", "Modified", "Rehab"].includes(attendance);
+      return {
+        playerId: player.id,
+        date: sessionDate,
+        sessionType,
+        attendance,
+        duration: allowed ? Number(duration) : 0,
+        rpe: existing?.rpe || 0,
+        comment: existing?.comment || "",
+        bodyCheck: existing?.bodyCheck || "None",
+        painArea: existing?.painArea || "",
+        load: allowed ? Number(duration) * Number(existing?.rpe || 0) : 0,
+      };
+    });
+
+    setSessionEntries((prev) => {
+      const filtered = prev.filter((entry) => entry.date !== sessionDate);
+      return [...filtered, ...payload];
+    });
+  };
+
+  return (
+    <SectionCard title="Admin Session Setup" icon={ClipboardList} subtitle="Set the session details and attendance before players submit RPE">
+      <div className="grid gap-4 xl:grid-cols-[180px_180px_180px_1fr]">
+        <div>
+          <label className="mb-2 block text-sm text-slate-200">Date</label>
+          <input
+            type="date"
+            value={sessionDate}
+            onChange={(e) => setSessionDate(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm text-slate-200">Session type</label>
+          <select
+            value={sessionType}
+            onChange={(e) => setSessionType(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
+          >
+            {SESSION_TYPES.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-2 block text-sm text-slate-200">Duration</label>
+          <input
+            type="number"
+            min="0"
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value))}
+            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
+          />
+        </div>
+        <div className="flex items-end">
+          <button onClick={saveSessionSetup} className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
+            Save session setup
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 overflow-hidden rounded-3xl border border-white/10">
+        <table className="min-w-full divide-y divide-white/10 text-sm">
+          <thead className="bg-white/5 text-left text-slate-300">
+            <tr>
+              <th className="px-4 py-3">Player</th>
+              <th className="px-4 py-3">Position</th>
+              <th className="px-4 py-3">Attendance</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+            {players.map((player) => (
+              <tr key={player.id}>
+                <td className="px-4 py-3 font-medium">{player.name}</td>
+                <td className="px-4 py-3 text-slate-300">{player.position}</td>
+                <td className="px-4 py-3">
+                  <select
+                    value={attendanceMap[player.id] || "Present"}
+                    onChange={(e) => setAttendanceMap({ ...attendanceMap, [player.id]: e.target.value })}
+                    className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-white outline-none"
+                  >
+                    {ATTENDANCE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </SectionCard>
+  );
+}
+
+function StaffDashboard({ players, wellnessEntries, sessionEntries, setHistoryPlayerId }) {
+  const today = todayKey();
+  const todayWellness = players.map((p) => {
+    const entry = wellnessEntries.find((w) => w.playerId === p.id && w.date === today);
+    const todaySession = sessionEntries.find((s) => s.playerId === p.id && s.date === today);
+    const load7 = sumLoads(sessionEntries, p.id, 7);
+    const load15 = sumLoads(sessionEntries, p.id, 15);
+    const load30 = sumLoads(sessionEntries, p.id, 30);
+    const attendance30 = attendanceSummary(sessionEntries, p.id, 30);
+    const flags = [];
+    if (!entry) flags.push("Missing form");
+    if (entry?.sleep === 1) flags.push("Poor sleep");
+    if (entry?.fatigue >= 4) flags.push("High fatigue");
+    if (entry?.soreness >= 4) flags.push("High soreness");
+    if (entry?.stress >= 4) flags.push("High stress");
+    if ((entry?.comment || "").trim()) flags.push("Pain note");
+    if (todaySession?.bodyCheck && todaySession.bodyCheck !== "None") flags.push(`Body check: ${todaySession.bodyCheck}`);
+
+    return {
+      ...p,
+      readiness: scoreReadiness(entry),
+      comment: entry?.comment || "",
+      sleep: entry?.sleep ?? null,
+      load7,
+      load15,
+      load30,
+      attendance30,
+      todaySession,
+      flags,
+    };
+  });
+
+  const atRisk = todayWellness.filter((p) => p.readiness !== null && p.readiness < 60);
+  const missingForms = todayWellness.filter((p) => p.readiness === null).length;
+  const painAlerts = sessionEntries.filter((s) => s.date === today && s.bodyCheck && s.bodyCheck !== "None").length;
+  const avgReadiness = todayWellness.filter((p) => p.readiness !== null).reduce((acc, p, _, arr) => acc + p.readiness / arr.length, 0);
+  const todayLoads = sessionEntries.filter((s) => s.date === today);
+  const avgTodayLoad = todayLoads.length ? Math.round(todayLoads.reduce((a, b) => a + b.load, 0) / todayLoads.length) : 0;
+  const completedWellness = todayWellness.filter((p) => p.readiness !== null).length;
+
+  const teamLoadCards = LOAD_WINDOWS.map((window) => ({
+    label: window.label,
+    value: todayWellness.reduce((sum, p) => sum + (window.days === 7 ? p.load7 : window.days === 15 ? p.load15 : p.load30), 0),
+  }));
+
+  const loadByDay = useMemo(() => {
+    const map = {};
+    sessionEntries.forEach((s) => {
+      map[s.date] = map[s.date] || { date: s.date, totalLoad: 0, avgLoad: 0, count: 0 };
+      map[s.date].totalLoad += s.load;
+      map[s.date].count += 1;
+    });
+    return Object.values(map)
+      .map((d) => ({ ...d, avgLoad: Math.round(d.totalLoad / d.count) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [sessionEntries]);
+
+  const readinessBars = todayWellness
+    .filter((p) => p.readiness !== null)
+    .map((p) => ({ name: p.name, readiness: p.readiness }))
+    .sort((a, b) => a.readiness - b.readiness);
+
+  return (
+    <div className="grid gap-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <StatCard label="Wellness completed" value={`${completedWellness}/${players.length}`} hint="Today" icon={Users} tone="blue" />
+        <StatCard label="Average readiness" value={Number.isFinite(avgReadiness) ? `${Math.round(avgReadiness)}%` : "--"} hint="Squad average" icon={HeartPulse} tone="green" />
+        <StatCard label="Players at risk" value={atRisk.length} hint="Readiness under 60%" icon={AlertTriangle} tone={atRisk.length ? "red" : "green"} />
+        <StatCard label="Average session load" value={avgTodayLoad || "--"} hint="Today, after RPE submissions" icon={Activity} tone="amber" />
+        <StatCard label="Missing wellness forms" value={missingForms} hint="Players still to complete" icon={ClipboardList} tone={missingForms ? "amber" : "green"} />
+        <StatCard label="Body check alerts" value={painAlerts} hint="Minor, moderate, or high" icon={AlertTriangle} tone={painAlerts ? "red" : "green"} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {teamLoadCards.map((card) => (
+          <StatCard key={card.label} label={`Team load ${card.label}`} value={card.value} hint="Rolling load window" icon={BarChart3} tone="blue" />
+        ))}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <SectionCard title="Training load trend" icon={BarChart3} subtitle="Average internal load by day (duration × RPE)">
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={loadByDay}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+                <YAxis stroke="#cbd5e1" fontSize={12} />
+                <Tooltip contentStyle={{ background: "#020617", border: "1px solid #334155", borderRadius: 16 }} />
+                <Line type="monotone" dataKey="avgLoad" stroke="#ffffff" strokeWidth={3} dot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Today readiness" icon={Moon} subtitle="Lowest to highest readiness scores">
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={readinessBars} layout="vertical" margin={{ left: 8, right: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis type="number" domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
+                <YAxis type="category" dataKey="name" stroke="#cbd5e1" width={72} fontSize={12} />
+                <Tooltip contentStyle={{ background: "#020617", border: "1px solid #334155", borderRadius: 16 }} />
+                <Bar dataKey="readiness" fill="#ffffff" radius={[0, 8, 8, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+      </div>
+
+      <SectionCard title="Daily player status" icon={Timer} subtitle="Simple traffic-light view for staff discussion before training">
+        <div className="overflow-hidden rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Player</th>
+                <th className="px-4 py-3">Position</th>
+                <th className="px-4 py-3">Readiness</th>
+                <th className="px-4 py-3">Sleep</th>
+                <th className="px-4 py-3">Flags</th>
+                <th className="px-4 py-3">7d</th>
+                <th className="px-4 py-3">15d</th>
+                <th className="px-4 py-3">30d</th>
+                <th className="px-4 py-3">RPE</th>
+                <th className="px-4 py-3">Attend %</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {todayWellness.map((p) => {
+                const tone = p.readiness == null ? "bg-slate-500" : p.readiness < 60 ? "bg-red-500" : p.readiness < 75 ? "bg-amber-400" : "bg-emerald-500";
+                return (
+                  <tr key={p.id} className="cursor-pointer hover:bg-white/5" onClick={() => setHistoryPlayerId(p.id)}>
+                    <td className="px-4 py-3 font-medium">{p.name}</td>
+                    <td className="px-4 py-3 text-slate-300">{p.position}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs">
+                        <span className={cn("h-2.5 w-2.5 rounded-full", tone)} />
+                        {p.readiness ?? "--"}{p.readiness != null ? "%" : ""}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">{p.sleep ?? "--"}{p.sleep != null ? "/5" : ""}</td>
+                    <td className="px-4 py-3 text-slate-300">{p.flags.length ? p.flags.slice(0, 2).join(", ") : "None"}</td>
+                    <td className="px-4 py-3">{p.load7}</td>
+                    <td className="px-4 py-3">{p.load15}</td>
+                    <td className="px-4 py-3">{p.load30}</td>
+                    <td className="px-4 py-3">{p.todaySession?.rpe ? p.todaySession.rpe : "--"}</td>
+                    <td className="px-4 py-3">{p.attendance30.percent}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
+  const playerWellness = [...wellnessEntries]
+    .filter((w) => w.playerId === selectedPlayer.id)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 7);
+
+  const playerSessions = [...sessionEntries]
+    .filter((s) => s.playerId === selectedPlayer.id)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 10);
+
+  const loads = {
+    load7: sumLoads(sessionEntries, selectedPlayer.id, 7),
+    load15: sumLoads(sessionEntries, selectedPlayer.id, 15),
+    load30: sumLoads(sessionEntries, selectedPlayer.id, 30),
+  };
+  const attendance = attendanceSummary(sessionEntries, selectedPlayer.id, 30);
+
+  return (
+    <SectionCard title="Player History" icon={Users} subtitle={`Individual monitoring view for ${selectedPlayer.name}`}>
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard label="Load 7d" value={loads.load7} hint="Rolling window" tone="blue" />
+        <StatCard label="Load 15d" value={loads.load15} hint="Rolling window" tone="blue" />
+        <StatCard label="Load 30d" value={loads.load30} hint="Rolling window" tone="blue" />
+        <StatCard label="Attendance 30d" value={`${attendance.percent}%`} hint={`${attendance.attended}/${attendance.total} sessions`} tone="green" />
+      </div>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        <div className="overflow-hidden rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Wellness date</th>
+                <th className="px-4 py-3">Readiness</th>
+                <th className="px-4 py-3">Comment</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {playerWellness.map((w, idx) => (
+                <tr key={`${w.date}-${idx}`}>
+                  <td className="px-4 py-3">{w.date}</td>
+                  <td className="px-4 py-3">{scoreReadiness(w)}%</td>
+                  <td className="px-4 py-3 text-slate-300">{w.comment || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Session date</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Attendance</th>
+                <th className="px-4 py-3">Load</th>
+                <th className="px-4 py-3">Body check</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {playerSessions.map((s, idx) => (
+                <tr key={`${s.date}-${idx}`}>
+                  <td className="px-4 py-3">{s.date}</td>
+                  <td className="px-4 py-3">{s.sessionType || "—"}</td>
+                  <td className="px-4 py-3">{s.attendance || "—"}</td>
+                  <td className="px-4 py-3">{s.load || 0}</td>
+                  <td className="px-4 py-3 text-slate-300">{s.bodyCheck && s.bodyCheck !== "None" ? `${s.bodyCheck}${s.painArea ? ` • ${s.painArea}` : ""}` : "None"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+export default function PlayerLoadMonitorApp() {
+  const [mode, setMode] = useState("staff");
+  const [players, setPlayers] = useLocalState("ppl-players-v1", DEFAULT_PLAYERS);
+  const [selectedPlayerId, setSelectedPlayerId] = useState(1);
+  const [historyPlayerId, setHistoryPlayerId] = useState(1);
+  const [wellnessEntries, setWellnessEntries] = useLocalState("ppl-wellness-v1", seedWellness);
+  const [sessionEntries, setSessionEntries] = useLocalState("ppl-session-v1", seedSessions);
+  const [newPlayer, setNewPlayer] = useState({ name: "", position: "" });
+
+  const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
+  const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
+
+  const addPlayer = () => {
+    if (!newPlayer.name.trim()) return;
+    const nextId = players.length ? Math.max(...players.map((p) => p.id)) + 1 : 1;
+    const payload = {
+      id: nextId,
+      name: newPlayer.name.trim(),
+      position: newPlayer.position.trim() || "TBD",
+    };
+    setPlayers((prev) => [...prev, payload]);
+    setNewPlayer({ name: "", position: "" });
+    setSelectedPlayerId(nextId);
+    setHistoryPlayerId(nextId);
+  };
+
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.15),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.10),_transparent_20%),linear-gradient(180deg,_#020617,_#0f172a)] text-white">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20 backdrop-blur md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-2 text-sm uppercase tracking-[0.25em] text-sky-300">LoadMonitor</p>
+            <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Bonivital Performance Tracking System</h1>
+            <p className="mt-3 max-w-3xl text-sm text-slate-300 md:text-base">
+              A working MVP to capture pre-training wellness, post-training RPE, daily readiness, rolling load, and attendance in one clean interface.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setMode("staff")}
+              className={cn(
+                "rounded-2xl px-4 py-3 text-sm font-semibold transition",
+                mode === "staff" ? "bg-white text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+              )}
+            >
+              Staff Dashboard
+            </button>
+            <button
+              onClick={() => setMode("player")}
+              className={cn(
+                "rounded-2xl px-4 py-3 text-sm font-semibold transition",
+                mode === "player" ? "bg-sky-400 text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+              )}
+            >
+              Player Check-In
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-6 grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className="text-sm text-slate-400">Demo squad</p>
+            <p className="text-lg font-semibold text-white">{players.length} players loaded</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm text-slate-300">Selected player</label>
+            <select
+              value={selectedPlayerId}
+              onChange={(e) => setSelectedPlayerId(Number(e.target.value))}
+              className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none"
+            >
+              {players.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — {p.position}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-4">
+          <div className="mb-3">
+            <p className="text-sm text-slate-400">Admin roster control</p>
+            <p className="text-lg font-semibold text-white">Add players progressively during preseason</p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
+            <input
+              value={newPlayer.name}
+              onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+              placeholder="Player name"
+              className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500"
+            />
+            <input
+              value={newPlayer.position}
+              onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+              placeholder="Position"
+              className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500"
+            />
+            <button onClick={addPlayer} className="rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
+              Add player
+            </button>
+          </div>
+        </div>
+
+        {mode === "staff" ? (
+          <div className="grid gap-6">
+            <AdminSessionSetup players={players} sessionEntries={sessionEntries} setSessionEntries={setSessionEntries} />
+            <StaffDashboard players={players} wellnessEntries={wellnessEntries} sessionEntries={sessionEntries} setHistoryPlayerId={setHistoryPlayerId} />
+            <PlayerHistory selectedPlayer={historyPlayer} wellnessEntries={wellnessEntries} sessionEntries={sessionEntries} />
+          </div>
+        ) : (
+          <PlayerForm
+            selectedPlayer={selectedPlayer}
+            wellnessEntries={wellnessEntries}
+            sessionEntries={sessionEntries}
+            setWellnessEntries={setWellnessEntries}
+            setSessionEntries={setSessionEntries}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
