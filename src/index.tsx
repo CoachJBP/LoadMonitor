@@ -226,14 +226,33 @@ function PlayerForm({ selectedPlayer, wellnessEntries, sessionEntries, setWellne
   const readiness = scoreReadiness(wellness);
   const isBlocked = ["Absent", "Off", "Not Selected"].includes(rpe.attendance);
 
-  const saveWellness = () => {
-    const today = todayKey();
-    const payload = { ...wellness, playerId: selectedPlayer.id, date: today };
-    setWellnessEntries((prev) => {
-      const filtered = prev.filter((x) => !(x.playerId === selectedPlayer.id && x.date === today));
-      return [...filtered, payload];
-    });
+ const saveWellness = async () => {
+  const today = todayKey();
+
+  const payload = {
+    player_id: selectedPlayer.id,
+    entry_date: today,
+    sleep: wellness.sleep,
+    fatigue: wellness.fatigue,
+    soreness: wellness.soreness,
+    stress: wellness.stress,
+    mood: wellness.mood,
+    freshness: wellness.freshness,
+    comment: wellness.comment || "",
   };
+
+  const { data, error } = await supabase
+    .from("wellness_entries")
+    .insert([payload])
+    .select();
+
+  if (error) {
+    console.error("SAVE WELLNESS ERROR:", error);
+    return;
+  }
+
+  console.log("SAVE WELLNESS OK:", data);
+};
 
   const saveRpe = () => {
     if (isBlocked) return;
