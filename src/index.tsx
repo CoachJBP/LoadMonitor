@@ -1346,10 +1346,6 @@ const loadRpeEntries = async () => {
   }
 };
 
-useEffect(() => {
-  loadRpeEntries();
-}, []);
-
 const loadSessionSetup = async () => {
   const { data, error } = await supabase
     .from("session_setup")
@@ -1383,9 +1379,13 @@ const loadSessionSetup = async () => {
     });
   }
 };
-
 useEffect(() => {
-  loadSessionSetup();
+  const loadSessionData = async () => {
+    await loadSessionSetup();
+    await loadRpeEntries();
+  };
+
+  loadSessionData();
 }, []);
   
 const addPlayer = async () => {
