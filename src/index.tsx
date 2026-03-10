@@ -858,6 +858,8 @@ export default function PlayerLoadMonitorApp() {
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "" });
   const [session, setSession] = useState(null);
 const [authLoading, setAuthLoading] = useState(true);
+  const [currentProfile, setCurrentProfile] = useState(null);
+const [profileLoading, setProfileLoading] = useState(true);
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
@@ -892,6 +894,35 @@ const [authLoading, setAuthLoading] = useState(true);
 
   return () => subscription.unsubscribe();
 }, []);
+  useEffect(() => {
+  const loadCurrentProfile = async () => {
+    if (!session?.user?.id) {
+      setCurrentProfile(null);
+      setProfileLoading(false);
+      return;
+    }
+
+    setProfileLoading(true);
+
+    const { data, error } = await supabase
+      .from("players")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("LOAD CURRENT PROFILE ERROR:", error);
+      setCurrentProfile(null);
+      setProfileLoading(false);
+      return;
+    }
+
+    setCurrentProfile(data || null);
+    setProfileLoading(false);
+  };
+
+  loadCurrentProfile();
+}, [session]);
   useEffect(() => {
   const loadPlayers = async () => {
     const { data, error } = await supabase
@@ -1009,7 +1040,9 @@ const addPlayer = async () => {
   if (authLoading) {
   return <div className="p-10 text-white">Loading...</div>;
 }
-
+  if (session && profileLoading) {
+  return <div className="p-10 text-white">Loading profile...</div>;
+}
 if (!session) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
