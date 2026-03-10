@@ -653,14 +653,6 @@ function StaffDashboard({
     ? Math.round(totalLoadSum / daySessions.length)
     : 0;
 
-  const plannedLoadSum = daySessions.reduce(
-    (sum, s) => sum + Number(s.plannedLoad || 0),
-    0
-  );
-
-  const plannedLoad = daySessions.length
-    ? Math.round(plannedLoadSum / daySessions.length)
-    : 0;
 const plannedSum = daySessions.reduce(
   (sum, s) => sum + Number(s.plannedLoad || 0),
   0
