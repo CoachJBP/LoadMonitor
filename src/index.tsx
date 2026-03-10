@@ -653,11 +653,14 @@ function StaffDashboard({
       <div className="flex items-center gap-3">
   <span className="text-sm text-slate-300">Date</span>
   <input
-    type="date"
-    value={selectedDate}
-    onChange={(e) => setSelectedDate(e.target.value)}
-    className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-white"
-  />
+  type="date"
+  value={selectedDate}
+  onChange={(e) => {
+    console.log("NEW DATE:", e.target.value);
+    setSelectedDate(e.target.value);
+  }}
+  className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-white"
+/>
 </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <StatCard label="Wellness completed" value={`${completedWellness}/${players.length}`} hint="Today" icon={Users} tone="blue" />
