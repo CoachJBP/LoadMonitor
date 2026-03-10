@@ -187,7 +187,7 @@ function RangeField({ label, value, onChange, lowBad = false, leftLabel = "Low",
         step="1"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-white"
+        className="w-full accent-white h-3"
       />
       <div className="mt-1 flex justify-between text-xs text-slate-400">
         <span>{leftLabel}</span>
@@ -334,7 +334,7 @@ if (data && data.length > 0) {
 };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-1 xl:grid-cols-2">
       <SectionCard
         title="Pre-Training Wellness"
         icon={HeartPulse}
@@ -358,7 +358,7 @@ if (data && data.length > 0) {
   onClick={saveWellness}
   disabled={wellnessSubmitted}
   className={cn(
-    "rounded-2xl px-4 py-3 font-semibold transition",
+    "rounded-2xl px-4 py-4 font-semibold transition",
     wellnessSubmitted
       ? "cursor-not-allowed bg-slate-700 text-slate-300"
       : "bg-white text-slate-950 hover:scale-[1.01]"
@@ -444,7 +444,7 @@ if (data && data.length > 0) {
   onClick={saveRpe}
   disabled={rpeSubmitted}
   className={cn(
-    "rounded-2xl px-4 py-3 font-semibold transition",
+    "rounded-2xl px-4 py-4 font-semibold transition",
     rpeSubmitted
       ? "cursor-not-allowed bg-slate-700 text-slate-300"
       : "bg-sky-400 text-slate-950 hover:scale-[1.01]"
@@ -1100,7 +1100,7 @@ if (!session) {
 
        <button
   onClick={handleLogin}
-  className="w-full bg-white text-black rounded-xl p-2 font-semibold"
+  className="w-full bg-white text-black rounded-xl p-3 font-semibold"
 >
   Login
 </button>
@@ -1114,7 +1114,7 @@ if (!session) {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.15),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.10),_transparent_20%),linear-gradient(180deg,_#020617,_#0f172a)] text-white">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20 backdrop-blur md:flex-row md:items-end md:justify-between">
           <div>
             <p className="mb-2 text-sm uppercase tracking-[0.25em] text-sky-300">LoadMonitor</p>
@@ -1153,7 +1153,7 @@ if (!session) {
       </button>
     </>
   ) : (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-200">
       Logged in as player
     </div>
   )}
