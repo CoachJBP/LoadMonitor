@@ -630,6 +630,46 @@ setSessionEntries((prev) => {
   );
 }
 
+function AdminManualEntry({ players, sessionEntries, wellnessEntries }) {
+  const [entryPlayerId, setEntryPlayerId] = useState(players[0]?.id || 1);
+  const [entryDate, setEntryDate] = useState(todayKey());
+
+  return (
+    <SectionCard
+      title="Admin Manual Entry"
+      icon={ClipboardList}
+      subtitle="Add or correct wellness and RPE entries for past or missed submissions"
+    >
+      <div className="grid gap-4 md:grid-cols-[1fr_180px]">
+        <div>
+          <label className="mb-2 block text-sm text-slate-200">Player</label>
+          <select
+            value={entryPlayerId}
+            onChange={(e) => setEntryPlayerId(Number(e.target.value))}
+            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
+          >
+            {players.map((player) => (
+              <option key={player.id} value={player.id}>
+                {player.name} — {player.position}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm text-slate-200">Date</label>
+          <input
+            type="date"
+            value={entryDate}
+            onChange={(e) => setEntryDate(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
+          />
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
 function StaffDashboard({
   players,
   wellnessEntries,
@@ -1608,6 +1648,11 @@ if (!session) {
         {mode === "staff" ? (
           <div className="grid gap-6">
             <AdminSessionSetup players={players} sessionEntries={sessionEntries} setSessionEntries={setSessionEntries} />
+            <AdminManualEntry
+      players={players}
+      sessionEntries={sessionEntries}
+      wellnessEntries={wellnessEntries}
+    />
             <StaffDashboard
   players={players}
   wellnessEntries={wellnessEntries}
