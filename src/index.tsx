@@ -699,7 +699,26 @@ if (error) {
   return;
 }
 
-  console.log("MANUAL WELLNESS SAVED");
+  setWellnessEntries((prev) => {
+  const filtered = prev.filter(
+    (w) => !(w.playerId === entryPlayerId && w.date === entryDate)
+  );
+
+  return [
+    ...filtered,
+    {
+      playerId: entryPlayerId,
+      date: entryDate,
+      sleep: manualWellness.sleep,
+      fatigue: manualWellness.fatigue,
+      soreness: manualWellness.soreness,
+      stress: manualWellness.stress,
+      mood: manualWellness.mood,
+      freshness: manualWellness.freshness,
+      comment: manualWellness.comment || "",
+    },
+  ];
+});
 };
   return (
     <SectionCard
