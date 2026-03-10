@@ -863,6 +863,18 @@ const [profileLoading, setProfileLoading] = useState(true);
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
+  const isAdmin = currentProfile?.role === "admin";
+  useEffect(() => {
+  if (currentProfile && currentProfile.role !== "admin") {
+    setSelectedPlayerId(currentProfile.id);
+    setHistoryPlayerId(currentProfile.id);
+    setMode("player");
+  }
+
+  if (currentProfile && currentProfile.role === "admin") {
+    setMode("staff");
+  }
+}, [currentProfile]);
 
   useEffect(() => {
   const testSupabase = async () => {
@@ -1085,25 +1097,33 @@ if (!session) {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setMode("staff")}
-              className={cn(
-                "rounded-2xl px-4 py-3 text-sm font-semibold transition",
-                mode === "staff" ? "bg-white text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
-              )}
-            >
-              Staff Dashboard
-            </button>
-            <button
-              onClick={() => setMode("player")}
-              className={cn(
-                "rounded-2xl px-4 py-3 text-sm font-semibold transition",
-                mode === "player" ? "bg-sky-400 text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
-              )}
-            >
-              Player Check-In
-            </button>
-          </div>
+  {isAdmin ? (
+    <>
+      <button
+        onClick={() => setMode("staff")}
+        className={cn(
+          "rounded-2xl px-4 py-3 text-sm font-semibold transition",
+          mode === "staff" ? "bg-white text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+        )}
+      >
+        Staff Dashboard
+      </button>
+      <button
+        onClick={() => setMode("player")}
+        className={cn(
+          "rounded-2xl px-4 py-3 text-sm font-semibold transition",
+          mode === "player" ? "bg-sky-400 text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+        )}
+      >
+        Player Check-In
+      </button>
+    </>
+  ) : (
+    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+      Logged in as player
+    </div>
+  )}
+</div>
         </div>
 
         <div className="mb-6 grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -1112,26 +1132,35 @@ if (!session) {
             <p className="text-lg font-semibold text-white">{players.length} players loaded</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <label className="text-sm text-slate-300">Selected player</label>
-            <select
-              value={selectedPlayerId}
-              onChange={(e) => {
-                const nextId = Number(e.target.value);
-                setSelectedPlayerId(nextId);
-                setHistoryPlayerId(nextId);
-              }}
-              className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none"
-            >
-              {players.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — {p.position}
-                </option>
-              ))}
-            </select>
-          </div>
+  {isAdmin ? (
+    <>
+      <label className="text-sm text-slate-300">Selected player</label>
+      <select
+        value={selectedPlayerId}
+        onChange={(e) => {
+          const nextId = Number(e.target.value);
+          setSelectedPlayerId(nextId);
+          setHistoryPlayerId(nextId);
+        }}
+        className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none"
+      >
+        {players.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name} — {p.position}
+          </option>
+        ))}
+      </select>
+    </>
+  ) : (
+    <div className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+      {currentProfile?.name} — {currentProfile?.position}
+    </div>
+  )}
+</div>
         </div>
 
-        <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-4">
+        {isAdmin && (
+  <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-4">
           <div className="mb-3">
             <p className="text-sm text-slate-400">Admin roster control</p>
             <p className="text-lg font-semibold text-white">Add players progressively during preseason</p>
@@ -1154,6 +1183,7 @@ if (!session) {
             </button>
           </div>
         </div>
+      )}
 
         {mode === "staff" ? (
           <div className="grid gap-6">
