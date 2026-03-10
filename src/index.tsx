@@ -593,6 +593,7 @@ function StaffDashboard({
   setHistoryPlayerId,
   selectedDate,
   setSelectedDate,
+  historyPlayerId,
 }) {
   const today = selectedDate;
   const last7Days = getLast7Days(selectedDate);
@@ -687,7 +688,16 @@ const totalLoad = daySessions.length
       .map((d) => ({ ...d, avgLoad: Math.round(d.totalLoad / d.count) }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [sessionEntries]);
+const playerLoadHistory = last7Days.map((date) => {
+  const entry = sessionEntries.find(
+    (s) => s.playerId === historyPlayerId && s.date === date
+  );
 
+  return {
+    date,
+    load: entry ? Number(entry.load || 0) : 0,
+  };
+});
   const readinessBars = todayWellness
     .filter((p) => p.readiness !== null)
     .map((p) => ({ name: p.name, readiness: p.readiness }))
@@ -1404,6 +1414,7 @@ if (!session) {
   setHistoryPlayerId={setHistoryPlayerId}
   selectedDate={selectedDate}
   setSelectedDate={setSelectedDate}
+  historyPlayerId={historyPlayerId}
 />
             <PlayerHistory selectedPlayer={historyPlayer} wellnessEntries={wellnessEntries} sessionEntries={sessionEntries} />
           </div>
