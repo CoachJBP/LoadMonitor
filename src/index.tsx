@@ -794,19 +794,14 @@ export default function PlayerLoadMonitorApp() {
     if (data) {
       const mapped = data.map((entry) => ({
   playerId: entry.player_id,
-  date: entry.created_at ? entry.created_at.slice(0, 10) : todayKey(),
-  rpe: entry.rpe,
-  duration: 0,
-  attendance: entry.attendance
-    ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
-    : "Present",
-  bodyCheck: entry.soreness_level
-    ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
-    : "None",
-  painArea: entry.pain_comment || "",
-  comment: "",
-  sessionType: "Training",
-  load: 0,
+  date: entry.entry_date,
+  sleep: entry.sleep,
+  fatigue: entry.fatigue,
+  soreness: entry.soreness,
+  stress: entry.stress,
+  mood: entry.mood,
+  freshness: entry.freshness,
+  comment: entry.comment || "",
 }));
 
       setWellnessEntries(mapped);
@@ -830,20 +825,24 @@ export default function PlayerLoadMonitorApp() {
     if (data) {
       const mapped = data.map((entry) => ({
         playerId: entry.player_id,
-        date: entry.created_at,
+        date: entry.created_at ? entry.created_at.slice(0, 10) : todayKey(),
         rpe: entry.rpe,
         duration: 0,
-        attendance: entry.attendance,
-        bodyCheck: entry.soreness_level,
-        painArea: entry.pain_comment,
+        attendance: entry.attendance
+          ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
+          : "Present",
+        bodyCheck: entry.soreness_level
+          ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
+          : "None",
+        painArea: entry.pain_comment || "",
         comment: "",
+        sessionType: "Training",
         load: 0,
       }));
 
       setSessionEntries(mapped);
     }
   };
-
   loadRpeEntries();
 }, []);
 const addPlayer = async () => {
