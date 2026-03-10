@@ -828,7 +828,22 @@ const playerLoadHistory = last7Days.map((date) => {
 </SectionCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <SectionCard title="Training load trend" icon={BarChart3} subtitle="Average internal load by day (duration × RPE)">
+        <SectionCard
+  title="Planned vs Actual Load Trend"
+  icon={BarChart3}
+  subtitle="Average planned load vs actual internal load by day"
+>
+          <div className="mb-3 flex gap-4 text-sm text-slate-300">
+  <div className="flex items-center gap-2">
+    <span className="inline-block h-3 w-3 rounded-full bg-white" />
+    <span>Actual Load</span>
+  </div>
+
+  <div className="flex items-center gap-2">
+    <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+    <span>Planned Load</span>
+  </div>
+</div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={loadByDay}>
