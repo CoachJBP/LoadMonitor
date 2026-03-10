@@ -75,6 +75,18 @@ const attendanceSummary = (entries, playerId, days = 30) => {
 };
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
+const getLast7Days = (endDate) => {
+  const dates = [];
+  const end = new Date(endDate);
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(end);
+    d.setDate(end.getDate() - i);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+
+  return dates;
+};
 
 const seedSessions = [
   { date: "2026-03-04", playerId: 1, duration: 75, rpe: 5, attendance: "Present", sessionType: "Training", bodyCheck: "None", painArea: "", comment: "" },
@@ -583,6 +595,20 @@ function StaffDashboard({
   setSelectedDate,
 }) {
   const today = selectedDate;
+  const last7Days = getLast7Days(selectedDate);
+
+  const microcycleData = last7Days.map((date) => {
+  const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
+  const totalLoad = sessionEntries
+    .filter((s) => s.date === date)
+    .reduce((sum, s) => sum + Number(s.load || 0), 0);
+
+  return {
+    date,
+    wellnessCount,
+    totalLoad,
+  };
+});
   const todayWellness = players.map((p) => {
     const entry = wellnessEntries.find((w) => w.playerId === p.id && w.date === today);
     const todaySession = sessionEntries.find((s) => s.playerId === p.id && s.date === today);
@@ -676,6 +702,32 @@ function StaffDashboard({
           <StatCard key={card.label} label={`Team load ${card.label}`} value={card.value} hint="Rolling load window" icon={BarChart3} tone="blue" />
         ))}
       </div>
+      <SectionCard
+  title="Microcycle View"
+  icon={BarChart3}
+  subtitle="7-day overview up to selected date"
+>
+  <div className="overflow-x-auto rounded-3xl border border-white/10">
+    <table className="min-w-full divide-y divide-white/10 text-sm">
+      <thead className="bg-white/5 text-left text-slate-300">
+        <tr>
+          <th className="px-4 py-3">Date</th>
+          <th className="px-4 py-3">Wellness Forms</th>
+          <th className="px-4 py-3">Total Load</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+        {microcycleData.map((day) => (
+          <tr key={day.date}>
+            <td className="px-4 py-3">{day.date}</td>
+            <td className="px-4 py-3">{day.wellnessCount}</td>
+            <td className="px-4 py-3">{day.totalLoad}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</SectionCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <SectionCard title="Training load trend" icon={BarChart3} subtitle="Average internal load by day (duration × RPE)">
