@@ -1312,23 +1312,25 @@ const loadRpeEntries = async () => {
       const rpe = Number(entry.rpe || 0);
 
       return {
-        playerId: entry.player_id,
-        date,
-        rpe,
-        duration,
-        attendance: existingSetup?.attendance || (
-          entry.attendance
-            ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
-            : "Present"
-        ),
-        bodyCheck: entry.soreness_level
-          ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
-          : "None",
-        painArea: entry.pain_comment || "",
-        comment: "",
-        sessionType: existingSetup?.sessionType || "Training",
-        load: duration * rpe,
-      };
+  playerId: entry.player_id,
+  date,
+  rpe,
+  duration,
+  attendance: existingSetup?.attendance || (
+    entry.attendance
+      ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
+      : "Present"
+  ),
+  bodyCheck: entry.soreness_level
+    ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
+    : "None",
+  painArea: entry.pain_comment || "",
+  comment: "",
+  sessionType: existingSetup?.sessionType || "Training",
+  targetRpe: Number(existingSetup?.targetRpe || 0),
+  plannedLoad: Number(existingSetup?.plannedLoad || 0),
+  load: duration * rpe,
+};
     });
 
     const setupOnly = prev.filter(
