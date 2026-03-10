@@ -1061,6 +1061,8 @@ const addPlayer = async () => {
 if (!session) {
 
   const handleLogin = async () => {
+    return (login screen)
+}
     setLoginError("");
 
     const { error } = await supabase.auth.signInWithPassword({
