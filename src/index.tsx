@@ -1061,8 +1061,7 @@ const addPlayer = async () => {
 if (!session) {
 
   const handleLogin = async () => {
-    return (login screen)
-}
+    
     setLoginError("");
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -1098,57 +1097,6 @@ if (!session) {
         </button>
 
         {loginError && <div>{loginError}</div>}
-
-      </div>
-    </div>
-  );
-}
-    setLoginError("");
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setLoginError(error.message);
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
-      <div className="bg-slate-800 p-6 rounded-2xl w-80 space-y-4">
-
-        <h2 className="text-lg font-bold">Login</h2>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl bg-slate-900 border border-white/10 p-2"
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl bg-slate-900 border border-white/10 p-2"
-        />
-
-        <button
-          onClick={handleLogin}
-          className="w-full bg-white text-black rounded-xl p-2 font-semibold"
-        >
-          Login
-        </button>
-
-        {loginError && (
-          <div className="text-red-400 text-sm">
-            {loginError}
-          </div>
-        )}
 
       </div>
     </div>
