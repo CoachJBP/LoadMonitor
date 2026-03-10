@@ -650,23 +650,23 @@ function StaffDashboard({
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
   <span className="text-sm text-slate-300">Date</span>
   <input
-  type="date"
-  value={selectedDate}
-  onChange={(e) => {
-    console.log("NEW DATE:", e.target.value);
-    setSelectedDate(e.target.value);
-  }}
-  className="rounded-2xl border border-white/20 bg-white/90 px-3 py-2 text-black cursor-pointer"
-/>
+    type="date"
+    value={selectedDate}
+    onChange={(e) => setSelectedDate(e.target.value)}
+    className="rounded-2xl border border-white/20 bg-white px-3 py-2 text-black cursor-pointer"
+  />
+  <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200">
+    Viewing: {selectedDate}
+  </div>
 </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        <StatCard label="Wellness completed" value={`${completedWellness}/${players.length}`} hint="Today" icon={Users} tone="blue" />
+        <StatCard label="Wellness completed" value={`${completedWellness}/${players.length}`} hint="Selected date" icon={Users} tone="blue" />
         <StatCard label="Average readiness" value={Number.isFinite(avgReadiness) ? `${Math.round(avgReadiness)}%` : "--"} hint="Squad average" icon={HeartPulse} tone="green" />
         <StatCard label="Players at risk" value={atRisk.length} hint="Readiness under 60%" icon={AlertTriangle} tone={atRisk.length ? "red" : "green"} />
-        <StatCard label="Average session load" value={avgTodayLoad || "--"} hint="Today, after RPE submissions" icon={Activity} tone="amber" />
+        <StatCard label="Average session load" value={avgTodayLoad || "--"} hint="Selected date" icon={Activity} tone="amber" />
         <StatCard label="Missing wellness forms" value={missingForms} hint="Players still to complete" icon={ClipboardList} tone={missingForms ? "amber" : "green"} />
         <StatCard label="Body check alerts" value={painAlerts} hint="Minor, moderate, or high" icon={AlertTriangle} tone={painAlerts ? "red" : "green"} />
       </div>
@@ -752,7 +752,7 @@ function StaffDashboard({
         </div>
       </SectionCard>
       <SectionCard
-  title="Wellness Details Today"
+  title="Wellness Details"
   icon={HeartPulse}
   subtitle="Full wellness breakdown for each player"
 >
