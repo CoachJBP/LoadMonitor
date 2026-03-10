@@ -1237,7 +1237,10 @@ const loadRpeEntries = async () => {
       load: 0,
     }));
 
-    setSessionEntries(mapped);
+    setSessionEntries((prev) => {
+  const setupOnly = prev.filter((entry) => !(entry.rpe && entry.rpe > 0));
+  return [...setupOnly, ...mapped];
+});
   }
 };
 
