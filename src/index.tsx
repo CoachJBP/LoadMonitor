@@ -1056,29 +1056,58 @@ const addPlayer = async () => {
   return <div className="p-10 text-white">Loading profile...</div>;
 }
 if (!session) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  const handleLogin = async () => {
+    setLoginError("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoginError(error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
-      <div className="bg-slate-800 p-6 rounded-2xl w-80">
-        <h2 className="text-lg font-bold mb-4">Login</h2>
+      <div className="bg-slate-800 p-6 rounded-2xl w-80 space-y-4">
+
+        <h2 className="text-lg font-bold">Login</h2>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-xl bg-slate-900 border border-white/10 p-2"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded-xl bg-slate-900 border border-white/10 p-2"
+        />
 
         <button
-          onClick={async () => {
-            const email = prompt("Email");
-            const password = prompt("Password");
-
-            const { error } = await supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-
-            if (error) {
-              alert(error.message);
-            }
-          }}
-          className="w-full bg-white text-black p-2 rounded"
+          onClick={handleLogin}
+          className="w-full bg-white text-black rounded-xl p-2 font-semibold"
         >
           Login
         </button>
+
+        {loginError && (
+          <div className="text-red-400 text-sm">
+            {loginError}
+          </div>
+        )}
+
       </div>
     </div>
   );
@@ -1096,23 +1125,29 @@ if (!session) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 items-center">
+
   {isAdmin ? (
     <>
       <button
         onClick={() => setMode("staff")}
         className={cn(
           "rounded-2xl px-4 py-3 text-sm font-semibold transition",
-          mode === "staff" ? "bg-white text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+          mode === "staff"
+            ? "bg-white text-slate-950"
+            : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
         )}
       >
         Staff Dashboard
       </button>
+
       <button
         onClick={() => setMode("player")}
         className={cn(
           "rounded-2xl px-4 py-3 text-sm font-semibold transition",
-          mode === "player" ? "bg-sky-400 text-slate-950" : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+          mode === "player"
+            ? "bg-sky-400 text-slate-950"
+            : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
         )}
       >
         Player Check-In
@@ -1123,6 +1158,17 @@ if (!session) {
       Logged in as player
     </div>
   )}
+
+  <button
+    onClick={async () => {
+      await supabase.auth.signOut();
+      window.location.reload();
+    }}
+    className="rounded-2xl border border-red-400/30 bg-red-500/20 px-4 py-3 text-sm font-semibold text-red-200 hover:bg-red-500/40"
+  >
+    Logout
+  </button>
+
 </div>
         </div>
 
