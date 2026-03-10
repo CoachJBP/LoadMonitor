@@ -788,6 +788,35 @@ const playerLoadHistory = last7Days.map((date) => {
         </SectionCard>
       </div>
 
+      <SectionCard
+  title="Player load history"
+  icon={BarChart3}
+  subtitle="Last 7 days for selected player"
+>
+  <div className="h-72 w-full">
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={playerLoadHistory}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+        <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+        <YAxis stroke="#cbd5e1" fontSize={12} />
+        <Tooltip
+          contentStyle={{
+            background: "#020617",
+            border: "1px solid #334155",
+            borderRadius: 16,
+          }}
+        />
+        <Line
+          type="monotone"
+          dataKey="load"
+          stroke="#38bdf8"
+          strokeWidth={3}
+          dot={{ r: 4 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+</SectionCard>
       <SectionCard title="Daily player status" icon={Timer} subtitle="Simple traffic-light view for staff discussion before training">
         <div className="overflow-hidden rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
