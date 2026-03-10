@@ -736,7 +736,7 @@ const diff = totalLoad - plannedLoad;
   };
 });
 
-  const loadByDay = useMemo(() => {
+const loadByDay = useMemo(() => {
   const map = {};
 
   sessionEntries.forEach((s) => {
@@ -744,21 +744,30 @@ const diff = totalLoad - plannedLoad;
       date: s.date,
       totalLoad: 0,
       plannedLoad: 0,
+      submittedPlannedLoad: 0,
       avgLoad: 0,
       avgPlannedLoad: 0,
-      count: 0,
+      submittedCount: 0,
     };
 
-    map[s.date].totalLoad += Number(s.load || 0);
-    map[s.date].plannedLoad += Number(s.plannedLoad || 0);
-    map[s.date].count += 1;
+    const hasRpe = Number(s.rpe || 0) > 0;
+
+    if (hasRpe) {
+      map[s.date].totalLoad += Number(s.load || 0);
+      map[s.date].submittedPlannedLoad += Number(s.plannedLoad || 0);
+      map[s.date].submittedCount += 1;
+    }
   });
 
   return Object.values(map)
     .map((d) => ({
       ...d,
-      avgLoad: d.count ? Math.round(d.totalLoad / d.count) : 0,
-      avgPlannedLoad: d.count ? Math.round(d.plannedLoad / d.count) : 0,
+      avgLoad: d.submittedCount
+        ? Math.round(d.totalLoad / d.submittedCount)
+        : 0,
+      avgPlannedLoad: d.submittedCount
+        ? Math.round(d.submittedPlannedLoad / d.submittedCount)
+        : 0,
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }, [sessionEntries]);
