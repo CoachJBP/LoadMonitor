@@ -1295,17 +1295,19 @@ const loadSessionSetup = async () => {
 
   if (data) {
     const mapped = data.map((entry) => ({
-      playerId: entry.player_id,
-      date: entry.session_date,
-      sessionType: entry.session_type || "Training",
-      attendance: entry.attendance || "Present",
-      duration: Number(entry.duration || 0),
-      rpe: 0,
-      comment: "",
-      bodyCheck: "None",
-      painArea: "",
-      load: 0,
-    }));
+  playerId: entry.player_id,
+  date: entry.session_date,
+  sessionType: entry.session_type || "Training",
+  attendance: entry.attendance || "Present",
+  duration: Number(entry.duration || 0),
+  targetRpe: Number(entry.target_rpe || 0),
+  plannedLoad: Number(entry.planned_load || 0),
+  rpe: 0,
+  comment: "",
+  bodyCheck: "None",
+  painArea: "",
+  load: 0,
+}));
 
     setSessionEntries((prev) => {
       const rpeOnly = prev.filter((entry) => entry.rpe && entry.rpe > 0);
