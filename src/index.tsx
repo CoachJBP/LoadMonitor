@@ -636,6 +636,7 @@ function AdminManualEntry({
   wellnessEntries,
   setWellnessEntries,
   loadWellnessEntries,
+  setSessionEntries,
 }) {
   const [entryPlayerId, setEntryPlayerId] = useState(players[0]?.id || 1);
   const [entryDate, setEntryDate] = useState(todayKey());
@@ -745,7 +746,72 @@ if (error) {
   ];
 });
 };
-  return (
+  const saveManualRpe = async () => {
+  const existingSession = sessionEntries.find(
+    (s) => s.playerId === entryPlayerId && s.date === entryDate
+  );
+
+  const payload = {
+    player_id: entryPlayerId,
+    session_id: null,
+    rpe: Number(manualRpe.rpe),
+    soreness_level: (manualRpe.bodyCheck || "None").toLowerCase(),
+    pain_comment:
+      manualRpe.bodyCheck === "None"
+        ? ""
+        : manualRpe.painArea || "",
+    attendance: (
+      existingSession?.attendance || "Present"
+    ).toLowerCase(),
+  };
+
+  const { error } = await supabase
+    .from("rpe_entries")
+    .insert([payload]);
+
+  if (error) {
+    console.error("MANUAL RPE ERROR:", error);
+    return;
+  }
+
+  const duration = Number(existingSession?.duration || 0);
+  const plannedLoad = Number(existingSession?.plannedLoad || 0);
+  const targetRpe = Number(existingSession?.targetRpe || 0);
+
+  setSessionEntries((prev) => {
+    const filtered = prev.filter(
+      (s) =>
+        !(
+          s.playerId === entryPlayerId &&
+          s.date === entryDate
+        )
+    );
+
+    return [
+      ...filtered,
+      {
+        playerId: entryPlayerId,
+        date: entryDate,
+        rpe: Number(manualRpe.rpe),
+        duration,
+        attendance:
+          existingSession?.attendance ||
+          "Present",
+        bodyCheck: manualRpe.bodyCheck || "None",
+        painArea: manualRpe.painArea || "",
+        comment: manualRpe.comment || "",
+        sessionType:
+          existingSession?.sessionType ||
+          "Training",
+        targetRpe,
+        plannedLoad,
+        load: duration * Number(manualRpe.rpe),
+      },
+    ];
+  });
+};
+
+return (
     <SectionCard
       title="Admin Manual Entry"
       icon={ClipboardList}
@@ -890,6 +956,15 @@ if (error) {
     className="rounded-2xl bg-emerald-400 px-4 py-3 font-semibold text-slate-950 hover:scale-[1.01]"
   >
     Save wellness entry
+  </button>
+</div>
+
+<div className="mt-3">
+  <button
+    onClick={saveManualRpe}
+    className="rounded-2xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 hover:scale-[1.01]"
+  >
+    Save RPE entry
   </button>
 </div>
     </SectionCard>
@@ -1880,6 +1955,7 @@ if (!session) {
   wellnessEntries={wellnessEntries}
   setWellnessEntries={setWellnessEntries}
   loadWellnessEntries={loadWellnessEntries}
+  setSessionEntries={setSessionEntries}
 />
             <StaffDashboard
   players={players}
