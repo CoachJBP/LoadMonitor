@@ -646,14 +646,16 @@ function StaffDashboard({
   const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
   const daySessions = sessionEntries.filter((s) => s.date === date);
 
-  const totalLoadSum = daySessions.reduce(
-    (sum, s) => sum + Number(s.load || 0),
-    0
-  );
+const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
 
-  const totalLoad = daySessions.length
-    ? Math.round(totalLoadSum / daySessions.length)
-    : 0;
+const totalLoadSum = submittedSessions.reduce(
+  (sum, s) => sum + Number(s.load || 0),
+  0
+);
+
+const totalLoad = submittedSessions.length
+  ? Math.round(totalLoadSum / submittedSessions.length)
+  : 0;
 
 const plannedSum = daySessions.reduce(
   (sum, s) => sum + Number(s.plannedLoad || 0),
