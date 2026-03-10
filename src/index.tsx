@@ -814,15 +814,29 @@ const playerLoadHistory = last7Days.map((date) => {
   <th className="px-4 py-3">Wellness Forms</th>
   <th className="px-4 py-3">Planned Load</th>
   <th className="px-4 py-3">Actual Load</th>
+  <th className="px-4 py-3">Diff</th>
 </tr>
       </thead>
       <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
         {microcycleData.map((day) => (
-          <tr key={day.date}>
+         <tr key={day.date}>
   <td className="px-4 py-3">{day.date}</td>
   <td className="px-4 py-3">{day.wellnessCount}</td>
   <td className="px-4 py-3 text-red-300">{day.plannedLoad}</td>
   <td className="px-4 py-3">{day.totalLoad}</td>
+  <td className="px-4 py-3">
+    <span
+      className={
+        day.diff > 0
+          ? "text-red-400"
+          : day.diff < 0
+          ? "text-emerald-400"
+          : ""
+      }
+    >
+      {day.diff}
+    </span>
+  </td>
 </tr>
         ))}
       </tbody>
