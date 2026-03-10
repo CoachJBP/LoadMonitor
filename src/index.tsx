@@ -1080,21 +1080,28 @@ if (!session) {
 
         <h2 className="text-lg font-bold">Login</h2>
 
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+       <input
+  type="email"
+  placeholder="Email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+/>
 
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+<input
+  type="password"
+  placeholder="Password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+/>
 
-        <button onClick={handleLogin}>
-          Login
-        </button>
+       <button
+  onClick={handleLogin}
+  className="w-full bg-white text-black rounded-xl p-2 font-semibold"
+>
+  Login
+</button>
 
         {loginError && <div>{loginError}</div>}
 
