@@ -649,11 +649,21 @@ function AdminManualEntry({
     freshness: 4,
     comment: "",
   });
+  
+  const [manualRpe, setManualRpe] = useState({
+  rpe: 6,
+  bodyCheck: "None",
+  painArea: "",
+  comment: "",
+});
 
   useEffect(() => {
     const existingWellness = wellnessEntries.find(
       (w) => w.playerId === entryPlayerId && w.date === entryDate
     );
+    const existingSession = sessionEntries.find(
+  (s) => s.playerId === entryPlayerId && s.date === entryDate
+);
 
     if (existingWellness) {
       setManualWellness({
@@ -676,7 +686,22 @@ function AdminManualEntry({
         comment: "",
       });
     }
-  }, [entryPlayerId, entryDate, wellnessEntries]);
+    if (existingSession) {
+  setManualRpe({
+    rpe: existingSession.rpe ?? 6,
+    bodyCheck: existingSession.bodyCheck || "None",
+    painArea: existingSession.painArea || "",
+    comment: existingSession.comment || "",
+  });
+} else {
+  setManualRpe({
+    rpe: 6,
+    bodyCheck: "None",
+    painArea: "",
+    comment: "",
+  });
+}
+  }, [entryPlayerId, entryDate, wellnessEntries, sessionEntries]);
 const saveManualWellness = async () => {
   const payload = {
     player_id: entryPlayerId,
@@ -792,13 +817,74 @@ if (error) {
       <div className="mt-4">
         <label className="mb-2 block text-sm text-slate-200">Wellness comment</label>
         <textarea
-          value={manualWellness.comment}
-          onChange={(e) => setManualWellness({ ...manualWellness, comment: e.target.value })}
-          placeholder="Optional note"
-          className="min-h-[96px] w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
-        />
+  value={manualWellness.comment}
+  onChange={(e) => setManualWellness({ ...manualWellness, comment: e.target.value })}
+  placeholder="Optional note"
+  className="min-h-[96px] w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+/>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-slate-950/30 p-4">
+  <p className="mb-4 text-sm font-semibold text-white">Manual RPE Entry</p>
+
+  <div className="grid gap-4">
+    <RangeField
+      label="Session RPE"
+      value={manualRpe.rpe}
+      onChange={(v) => setManualRpe({ ...manualRpe, rpe: v })}
+      min={1}
+      max={10}
+      lowBad
+      leftLabel="Super Light"
+      rightLabel="Maximum"
+    />
+
+    <div>
+      <label className="mb-2 block text-sm text-slate-200">Body Check</label>
+      <div className="grid gap-2 md:grid-cols-4">
+        {BODY_CHECK_OPTIONS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() =>
+              setManualRpe({
+                ...manualRpe,
+                bodyCheck: option,
+                painArea: option === "None" ? "" : manualRpe.painArea,
+              })
+            }
+            className={cn(
+              "rounded-2xl border px-3 py-3 text-sm font-medium transition",
+              manualRpe.bodyCheck === option
+                ? "border-sky-300 bg-sky-300 text-slate-950"
+                : "border-white/10 bg-slate-950/60 text-white hover:bg-white/10"
+            )}
+          >
+            {option}
+          </button>
+        ))}
       </div>
-      <div className="mt-4">
+    </div>
+
+    {manualRpe.bodyCheck !== "None" && (
+      <textarea
+        value={manualRpe.painArea}
+        onChange={(e) => setManualRpe({ ...manualRpe, painArea: e.target.value })}
+        placeholder="Pain area"
+        className="min-h-[80px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+      />
+    )}
+
+    <textarea
+      value={manualRpe.comment}
+      onChange={(e) => setManualRpe({ ...manualRpe, comment: e.target.value })}
+      placeholder="Optional RPE comment"
+      className="min-h-[80px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+    />
+  </div>
+</div>
+
+<div className="mt-4">
   <button
     onClick={saveManualWellness}
     className="rounded-2xl bg-emerald-400 px-4 py-3 font-semibold text-slate-950 hover:scale-[1.01]"
