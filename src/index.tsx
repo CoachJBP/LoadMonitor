@@ -644,19 +644,29 @@ function StaffDashboard({
   const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
   const daySessions = sessionEntries.filter((s) => s.date === date);
 
-const totalLoadSum = daySessions.reduce(
-  (sum, s) => sum + Number(s.load || 0),
-  0
-);
+  const totalLoadSum = daySessions.reduce(
+    (sum, s) => sum + Number(s.load || 0),
+    0
+  );
 
-const totalLoad = daySessions.length
-  ? Math.round(totalLoadSum / daySessions.length)
-  : 0;
+  const totalLoad = daySessions.length
+    ? Math.round(totalLoadSum / daySessions.length)
+    : 0;
+
+  const plannedLoadSum = daySessions.reduce(
+    (sum, s) => sum + Number(s.plannedLoad || 0),
+    0
+  );
+
+  const plannedLoad = daySessions.length
+    ? Math.round(plannedLoadSum / daySessions.length)
+    : 0;
 
   return {
     date,
     wellnessCount,
     totalLoad,
+    plannedLoad,
   };
 });
   const todayWellness = players.map((p) => {
@@ -782,18 +792,20 @@ const playerLoadHistory = last7Days.map((date) => {
     <table className="min-w-full divide-y divide-white/10 text-sm">
       <thead className="bg-white/5 text-left text-slate-300">
         <tr>
-          <th className="px-4 py-3">Date</th>
-          <th className="px-4 py-3">Wellness Forms</th>
-          <th className="px-4 py-3">Total Load</th>
-        </tr>
+  <th className="px-4 py-3">Date</th>
+  <th className="px-4 py-3">Wellness Forms</th>
+  <th className="px-4 py-3">Planned Load</th>
+  <th className="px-4 py-3">Actual Load</th>
+</tr>
       </thead>
       <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
         {microcycleData.map((day) => (
           <tr key={day.date}>
-            <td className="px-4 py-3">{day.date}</td>
-            <td className="px-4 py-3">{day.wellnessCount}</td>
-            <td className="px-4 py-3">{day.totalLoad}</td>
-          </tr>
+  <td className="px-4 py-3">{day.date}</td>
+  <td className="px-4 py-3">{day.wellnessCount}</td>
+  <td className="px-4 py-3 text-red-300">{day.plannedLoad}</td>
+  <td className="px-4 py-3">{day.totalLoad}</td>
+</tr>
         ))}
       </tbody>
     </table>
