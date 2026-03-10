@@ -810,6 +810,37 @@ export default function PlayerLoadMonitorApp() {
 
   loadWellnessEntries();
 }, []);
+  useEffect(() => {
+  const loadRpeEntries = async () => {
+    const { data, error } = await supabase
+      .from("rpe_entries")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("LOAD RPE ERROR:", error);
+      return;
+    }
+
+    if (data) {
+      const mapped = data.map((entry) => ({
+        playerId: entry.player_id,
+        date: entry.created_at,
+        rpe: entry.rpe,
+        duration: 0,
+        attendance: entry.attendance,
+        bodyCheck: entry.soreness_level,
+        painArea: entry.pain_comment,
+        comment: "",
+        load: 0,
+      }));
+
+      setSessionEntries(mapped);
+    }
+  };
+
+  loadRpeEntries();
+}, []);
 const addPlayer = async () => {
   if (!newPlayer.name.trim()) return;
 
