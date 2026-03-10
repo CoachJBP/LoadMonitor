@@ -238,6 +238,7 @@ const wellnessSubmitted = wellnessEntries.some((x) => x.playerId === selectedPla
 const rpeSubmitted = sessionEntries.some((x) => x.playerId === selectedPlayer.id && x.date === today);
 
  const saveWellness = async () => {
+   if (wellnessSubmitted) return;
   const today = todayKey();
 
   const payload = {
@@ -286,6 +287,7 @@ await loadWellnessEntries();
 };
 
   const saveRpe = async () => {
+     if (rpeSubmitted) return;
   if (isBlocked) return;
 
   const payload = {
