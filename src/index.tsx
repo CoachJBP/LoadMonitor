@@ -599,9 +599,16 @@ function StaffDashboard({
 
   const microcycleData = last7Days.map((date) => {
   const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
-  const totalLoad = sessionEntries
-    .filter((s) => s.date === date)
-    .reduce((sum, s) => sum + Number(s.load || 0), 0);
+  const daySessions = sessionEntries.filter((s) => s.date === date);
+
+const totalLoadSum = daySessions.reduce(
+  (sum, s) => sum + Number(s.load || 0),
+  0
+);
+
+const totalLoad = daySessions.length
+  ? Math.round(totalLoadSum / daySessions.length)
+  : 0;
 
   return {
     date,
@@ -652,10 +659,22 @@ function StaffDashboard({
   const avgTodayLoad = todayLoads.length ? Math.round(todayLoads.reduce((a, b) => a + b.load, 0) / todayLoads.length) : 0;
   const completedWellness = todayWellness.filter((p) => p.readiness !== null).length;
 
-  const teamLoadCards = LOAD_WINDOWS.map((window) => ({
+  const teamLoadCards = LOAD_WINDOWS.map((window) => {
+  const values = todayWellness
+    .map((p) =>
+      window.days === 7 ? p.load7 : window.days === 15 ? p.load15 : p.load30
+    )
+    .filter((value) => value > 0);
+
+  const averageLoad = values.length
+    ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+    : 0;
+
+  return {
     label: window.label,
-    value: todayWellness.reduce((sum, p) => sum + (window.days === 7 ? p.load7 : window.days === 15 ? p.load15 : p.load30), 0),
-  }));
+    value: averageLoad,
+  };
+});
 
   const loadByDay = useMemo(() => {
     const map = {};
