@@ -743,7 +743,6 @@ const loadByDay = useMemo(() => {
     map[s.date] = map[s.date] || {
       date: s.date,
       totalLoad: 0,
-      plannedLoad: 0,
       submittedPlannedLoad: 0,
       avgLoad: 0,
       avgPlannedLoad: 0,
@@ -771,6 +770,7 @@ const loadByDay = useMemo(() => {
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }, [sessionEntries]);
+  
 const playerLoadHistory = last7Days.map((date) => {
   const entry = sessionEntries.find(
     (s) => s.playerId === historyPlayerId && s.date === date
