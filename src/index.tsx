@@ -233,6 +233,9 @@ function PlayerForm({
 
   const readiness = scoreReadiness(wellness);
   const isBlocked = ["Absent", "Off", "Not Selected"].includes(rpe.attendance);
+  const today = todayKey();
+const wellnessSubmitted = wellnessEntries.some((x) => x.playerId === selectedPlayer.id && x.date === today);
+const rpeSubmitted = sessionEntries.some((x) => x.playerId === selectedPlayer.id && x.date === today);
 
  const saveWellness = async () => {
   const today = todayKey();
@@ -260,6 +263,25 @@ function PlayerForm({
   }
 
   console.log("SAVE WELLNESS OK:", data);
+
+if (data && data.length > 0) {
+  const entry = data[0];
+
+  setWellnessEntries((prev) => [
+    ...prev,
+    {
+      playerId: entry.player_id,
+      date: entry.entry_date,
+      sleep: entry.sleep,
+      fatigue: entry.fatigue,
+      soreness: entry.soreness,
+      stress: entry.stress,
+      mood: entry.mood,
+      freshness: entry.freshness,
+      comment: entry.comment || "",
+    },
+  ]);
+}
 await loadWellnessEntries();
 };
 
@@ -286,6 +308,26 @@ await loadWellnessEntries();
   }
 
   console.log("SAVE RPE OK:", data);
+
+if (data && data.length > 0) {
+  const entry = data[0];
+
+  setSessionEntries((prev) => [
+    ...prev,
+    {
+      playerId: entry.player_id,
+      date: todayKey(),
+      rpe: entry.rpe,
+      duration: 0,
+      attendance: entry.attendance || "present",
+      bodyCheck: entry.soreness_level || "none",
+      painArea: entry.pain_comment || "",
+      comment: "",
+      sessionType: "Training",
+      load: 0,
+    },
+  ]);
+}
     await loadRpeEntries();
 };
 
@@ -310,9 +352,18 @@ await loadWellnessEntries();
             placeholder="Injury / pain comment"
             className="min-h-[96px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
           />
-          <button onClick={saveWellness} className="rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
-            Save wellness check
-          </button>
+          <button
+  onClick={saveWellness}
+  disabled={wellnessSubmitted}
+  className={cn(
+    "rounded-2xl px-4 py-3 font-semibold transition",
+    wellnessSubmitted
+      ? "cursor-not-allowed bg-slate-700 text-slate-300"
+      : "bg-white text-slate-950 hover:scale-[1.01]"
+  )}
+>
+  {wellnessSubmitted ? "Wellness already submitted" : "Save wellness check"}
+</button>
         </div>
       </SectionCard>
 
@@ -387,9 +438,18 @@ await loadWellnessEntries();
               placeholder="Optional comment"
               className="min-h-[96px] rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
             />
-            <button onClick={saveRpe} className="rounded-2xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
-              Save RPE entry
-            </button>
+            <button
+  onClick={saveRpe}
+  disabled={rpeSubmitted}
+  className={cn(
+    "rounded-2xl px-4 py-3 font-semibold transition",
+    rpeSubmitted
+      ? "cursor-not-allowed bg-slate-700 text-slate-300"
+      : "bg-sky-400 text-slate-950 hover:scale-[1.01]"
+  )}
+>
+  {rpeSubmitted ? "RPE already submitted" : "Save RPE entry"}
+</button>
           </div>
         )}
       </SectionCard>
