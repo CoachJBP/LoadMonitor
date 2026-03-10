@@ -254,21 +254,30 @@ function PlayerForm({ selectedPlayer, wellnessEntries, sessionEntries, setWellne
   console.log("SAVE WELLNESS OK:", data);
 };
 
-  const saveRpe = () => {
-    if (isBlocked) return;
-    const today = todayKey();
-    const payload = {
-      ...rpe,
-      playerId: selectedPlayer.id,
-      date: today,
-      load: Number(rpe.duration) * Number(rpe.rpe),
-      painArea: rpe.bodyCheck === "None" ? "" : rpe.painArea,
-    };
-    setSessionEntries((prev) => {
-      const filtered = prev.filter((x) => !(x.playerId === selectedPlayer.id && x.date === today));
-      return [...filtered, payload];
-    });
+  const saveRpe = async () => {
+  if (isBlocked) return;
+
+  const payload = {
+    player_id: selectedPlayer.id,
+    session_id: null,
+    rpe: rpe.rpe,
+    soreness_level: (rpe.bodyCheck || "None").toLowerCase(),
+    pain_comment: rpe.bodyCheck === "None" ? "" : (rpe.painArea || ""),
+    attendance: (rpe.attendance || "Present").toLowerCase(),
   };
+
+  const { data, error } = await supabase
+    .from("rpe_entries")
+    .insert([payload])
+    .select();
+
+  if (error) {
+    console.error("SAVE RPE ERROR:", error);
+    return;
+  }
+
+  console.log("SAVE RPE OK:", data);
+};
 
   return (
     <div className="grid gap-6 xl:grid-cols-2">
