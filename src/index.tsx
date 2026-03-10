@@ -641,6 +641,7 @@ function StaffDashboard({
 }) {
   const today = selectedDate;
   const last7Days = getLast7Days(selectedDate);
+  const last4Days = last7Days.slice(-4);
 
   const microcycleData = last7Days.map((date) => {
   const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
@@ -737,39 +738,31 @@ const diff = totalLoad - plannedLoad;
 });
 
 const loadByDay = useMemo(() => {
-  const map = {};
+  return last4Days.map((date) => {
+    const daySessions = sessionEntries.filter((s) => s.date === date);
+    const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
 
-  sessionEntries.forEach((s) => {
-    map[s.date] = map[s.date] || {
-      date: s.date,
-      totalLoad: 0,
-      submittedPlannedLoad: 0,
-      avgLoad: 0,
-      avgPlannedLoad: 0,
-      submittedCount: 0,
+    const totalLoadSum = submittedSessions.reduce(
+      (sum, s) => sum + Number(s.load || 0),
+      0
+    );
+
+    const plannedLoadSum = submittedSessions.reduce(
+      (sum, s) => sum + Number(s.plannedLoad || 0),
+      0
+    );
+
+    return {
+      date,
+      avgLoad: submittedSessions.length
+        ? Math.round(totalLoadSum / submittedSessions.length)
+        : 0,
+      avgPlannedLoad: submittedSessions.length
+        ? Math.round(plannedLoadSum / submittedSessions.length)
+        : 0,
     };
-
-    const hasRpe = Number(s.rpe || 0) > 0;
-
-    if (hasRpe) {
-      map[s.date].totalLoad += Number(s.load || 0);
-      map[s.date].submittedPlannedLoad += Number(s.plannedLoad || 0);
-      map[s.date].submittedCount += 1;
-    }
   });
-
-  return Object.values(map)
-    .map((d) => ({
-      ...d,
-      avgLoad: d.submittedCount
-        ? Math.round(d.totalLoad / d.submittedCount)
-        : 0,
-      avgPlannedLoad: d.submittedCount
-        ? Math.round(d.submittedPlannedLoad / d.submittedCount)
-        : 0,
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-}, [sessionEntries]);
+}, [sessionEntries, last4Days]);
   
 const playerLoadHistory = last7Days.map((date) => {
   const entry = sessionEntries.find(
