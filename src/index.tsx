@@ -197,7 +197,14 @@ function RangeField({ label, value, onChange, lowBad = false, leftLabel = "Low",
   );
 }
 
-function PlayerForm({ selectedPlayer, wellnessEntries, sessionEntries, setWellnessEntries, setSessionEntries }) {
+function PlayerForm({
+  selectedPlayer,
+  wellnessEntries,
+  sessionEntries,
+  setWellnessEntries,
+  setSessionEntries,
+  loadWellnessEntries,
+}) {
   const [wellness, setWellness] = useState({ sleep: 4, fatigue: 2, soreness: 2, stress: 2, mood: 4, freshness: 4, comment: "" });
   const [rpe, setRpe] = useState({ duration: 0, rpe: 6, comment: "", bodyCheck: "None", painArea: "", attendance: "Present", sessionType: "Training" });
 
@@ -252,6 +259,7 @@ function PlayerForm({ selectedPlayer, wellnessEntries, sessionEntries, setWellne
   }
 
   console.log("SAVE WELLNESS OK:", data);
+await loadWellnessEntries();
 };
 
   const saveRpe = async () => {
@@ -963,12 +971,13 @@ const addPlayer = async () => {
           </div>
         ) : (
           <PlayerForm
-            selectedPlayer={selectedPlayer}
-            wellnessEntries={wellnessEntries}
-            sessionEntries={sessionEntries}
-            setWellnessEntries={setWellnessEntries}
-            setSessionEntries={setSessionEntries}
-          />
+  selectedPlayer={selectedPlayer}
+  wellnessEntries={wellnessEntries}
+  sessionEntries={sessionEntries}
+  setWellnessEntries={setWellnessEntries}
+  setSessionEntries={setSessionEntries}
+  loadWellnessEntries={loadWellnessEntries}
+/>
         )}
       </div>
     </div>
