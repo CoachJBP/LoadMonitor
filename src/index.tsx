@@ -493,17 +493,19 @@ function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
       const attendance = attendanceMap[player.id] || "Present";
       const allowed = ["Present", "Modified", "Rehab"].includes(attendance);
       return {
-        playerId: player.id,
-        date: sessionDate,
-        sessionType,
-        attendance,
-        duration: allowed ? Number(duration) : 0,
-        rpe: existing?.rpe || 0,
-        comment: existing?.comment || "",
-        bodyCheck: existing?.bodyCheck || "None",
-        painArea: existing?.painArea || "",
-        load: allowed ? Number(duration) * Number(existing?.rpe || 0) : 0,
-      };
+  playerId: player.id,
+  date: sessionDate,
+  sessionType,
+  attendance,
+  duration: allowed ? Number(duration) : 0,
+  rpe: existing?.rpe || 0,
+  targetRpe: Number(targetRpe),
+  plannedLoad: allowed ? Number(duration) * Number(targetRpe) : 0,
+  comment: existing?.comment || "",
+  bodyCheck: existing?.bodyCheck || "None",
+  painArea: existing?.painArea || "",
+  load: allowed ? Number(duration) * Number(existing?.rpe || 0) : 0,
+};
     });
 const supabasePayload = payload.map((entry) => ({
   session_date: entry.date,
