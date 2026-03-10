@@ -869,6 +869,65 @@ const [loginError, setLoginError] = useState("");
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
   const isAdmin = currentProfile?.role === "admin";
+
+  const exportToCsv = (filename, rows) => {
+  if (!rows || !rows.length) return;
+
+  const headers = Object.keys(rows[0]);
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      headers
+        .map((header) => {
+          const value = row[header] ?? "";
+          return `"${String(value).replace(/"/g, '""')}"`;
+        })
+        .join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const handleExportWellness = () => {
+  const rows = wellnessEntries.map((entry) => ({
+    playerId: entry.playerId,
+    date: entry.date,
+    sleep: entry.sleep,
+    fatigue: entry.fatigue,
+    soreness: entry.soreness,
+    stress: entry.stress,
+    mood: entry.mood,
+    freshness: entry.freshness,
+    comment: entry.comment || "",
+  }));
+
+  exportToCsv("wellness_export.csv", rows);
+};
+
+const handleExportRpe = () => {
+  const rows = sessionEntries.map((entry) => ({
+    playerId: entry.playerId,
+    date: entry.date,
+    rpe: entry.rpe,
+    duration: entry.duration,
+    attendance: entry.attendance,
+    bodyCheck: entry.bodyCheck,
+    painArea: entry.painArea || "",
+    sessionType: entry.sessionType || "",
+    load: entry.load ?? 0,
+  }));
+
+  exportToCsv("rpe_export.csv", rows);
+};
   useEffect(() => {
   if (currentProfile && currentProfile.role !== "admin") {
     setSelectedPlayerId(currentProfile.id);
@@ -1151,6 +1210,20 @@ if (!session) {
       >
         Player Check-In
       </button>
+
+      <button
+  onClick={handleExportWellness}
+  className="rounded-2xl px-4 py-4 text-sm font-semibold border border-emerald-400/30 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/40"
+>
+  Export Wellness CSV
+</button>
+
+<button
+  onClick={handleExportRpe}
+  className="rounded-2xl px-4 py-4 text-sm font-semibold border border-sky-400/30 bg-sky-500/20 text-sky-200 hover:bg-sky-500/40"
+>
+  Export RPE CSV
+</button>
     </>
   ) : (
     <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-200">
