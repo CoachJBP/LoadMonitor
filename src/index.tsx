@@ -856,6 +856,8 @@ export default function PlayerLoadMonitorApp() {
   const [wellnessEntries, setWellnessEntries] = useState(seedWellness);
   const [sessionEntries, setSessionEntries] = useState([]);
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "" });
+  const [session, setSession] = useState(null);
+const [authLoading, setAuthLoading] = useState(true);
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
@@ -868,6 +870,27 @@ export default function PlayerLoadMonitorApp() {
   };
 
   testSupabase();
+}, []);
+  useEffect(() => {
+  const getSession = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    setSession(session);
+    setAuthLoading(false);
+  };
+
+  getSession();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setSession(session);
+    setAuthLoading(false);
+  });
+
+  return () => subscription.unsubscribe();
 }, []);
   useEffect(() => {
   const loadPlayers = async () => {
@@ -983,6 +1006,38 @@ const addPlayer = async () => {
     setHistoryPlayerId(createdPlayer.id);
   }
 };
+  if (authLoading) {
+  return <div className="p-10 text-white">Loading...</div>;
+}
+
+if (!session) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+      <div className="bg-slate-800 p-6 rounded-2xl w-80">
+        <h2 className="text-lg font-bold mb-4">Login</h2>
+
+        <button
+          onClick={async () => {
+            const email = prompt("Email");
+            const password = prompt("Password");
+
+            const { error } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+
+            if (error) {
+              alert(error.message);
+            }
+          }}
+          className="w-full bg-white text-black p-2 rounded"
+        >
+          Login
+        </button>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.15),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.10),_transparent_20%),linear-gradient(180deg,_#020617,_#0f172a)] text-white">
