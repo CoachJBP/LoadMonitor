@@ -659,7 +659,7 @@ function StaffDashboard({
     console.log("NEW DATE:", e.target.value);
     setSelectedDate(e.target.value);
   }}
-  className="rounded-2xl border border-white/20 bg-slate-800 px-3 py-2 text-white cursor-pointer"
+  className="rounded-2xl border border-white/20 bg-white/90 px-3 py-2 text-black cursor-pointer"
 />
 </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
