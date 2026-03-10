@@ -574,8 +574,15 @@ function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
   );
 }
 
-function StaffDashboard({ players, wellnessEntries, sessionEntries, setHistoryPlayerId }) {
-  const today = todayKey();
+function StaffDashboard({
+  players,
+  wellnessEntries,
+  sessionEntries,
+  setHistoryPlayerId,
+  selectedDate,
+  setSelectedDate,
+}) {
+  const today = selectedDate;
   const todayWellness = players.map((p) => {
     const entry = wellnessEntries.find((w) => w.playerId === p.id && w.date === today);
     const todaySession = sessionEntries.find((s) => s.playerId === p.id && s.date === today);
@@ -643,6 +650,15 @@ function StaffDashboard({ players, wellnessEntries, sessionEntries, setHistoryPl
 
   return (
     <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+  <span className="text-sm text-slate-300">Date</span>
+  <input
+    type="date"
+    value={selectedDate}
+    onChange={(e) => setSelectedDate(e.target.value)}
+    className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-white"
+  />
+</div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <StatCard label="Wellness completed" value={`${completedWellness}/${players.length}`} hint="Today" icon={Users} tone="blue" />
         <StatCard label="Average readiness" value={Number.isFinite(avgReadiness) ? `${Math.round(avgReadiness)}%` : "--"} hint="Squad average" icon={HeartPulse} tone="green" />
@@ -857,6 +873,7 @@ export default function PlayerLoadMonitorApp() {
   const [historyPlayerId, setHistoryPlayerId] = useState(1);
   const [wellnessEntries, setWellnessEntries] = useState(seedWellness);
   const [sessionEntries, setSessionEntries] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(todayKey());
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "" });
   const [session, setSession] = useState(null);
 const [authLoading, setAuthLoading] = useState(true);
@@ -1306,7 +1323,14 @@ if (!session) {
         {mode === "staff" ? (
           <div className="grid gap-6">
             <AdminSessionSetup players={players} sessionEntries={sessionEntries} setSessionEntries={setSessionEntries} />
-            <StaffDashboard players={players} wellnessEntries={wellnessEntries} sessionEntries={sessionEntries} setHistoryPlayerId={setHistoryPlayerId} />
+            <StaffDashboard
+  players={players}
+  wellnessEntries={wellnessEntries}
+  sessionEntries={sessionEntries}
+  setHistoryPlayerId={setHistoryPlayerId}
+  selectedDate={selectedDate}
+  setSelectedDate={setSelectedDate}
+/>
             <PlayerHistory selectedPlayer={historyPlayer} wellnessEntries={wellnessEntries} sessionEntries={sessionEntries} />
           </div>
         ) : (
