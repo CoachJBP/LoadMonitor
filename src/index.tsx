@@ -765,14 +765,41 @@ if (error) {
     ).toLowerCase(),
   };
 
-  const { error } = await supabase
-    .from("rpe_entries")
-    .insert([payload]);
+  const { data: existingRows, error: fetchError } = await supabase
+  .from("rpe_entries")
+  .select("id, created_at")
+  .eq("player_id", entryPlayerId)
+  .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("MANUAL RPE ERROR:", error);
+if (fetchError) {
+  console.error("FETCH MANUAL RPE ERROR:", fetchError);
+  return;
+}
+
+const rowToDelete = existingRows?.find(
+  (row) => row.created_at?.slice(0, 10) === entryDate
+);
+
+if (rowToDelete) {
+  const { error: deleteError } = await supabase
+    .from("rpe_entries")
+    .delete()
+    .eq("id", rowToDelete.id);
+
+  if (deleteError) {
+    console.error("DELETE MANUAL RPE ERROR:", deleteError);
     return;
   }
+}
+
+const { error: insertError } = await supabase
+  .from("rpe_entries")
+  .insert([payload]);
+
+if (insertError) {
+  console.error("MANUAL RPE ERROR:", insertError);
+  return;
+}
 
   const duration = Number(existingSession?.duration || 0);
   const plannedLoad = Number(existingSession?.plannedLoad || 0);
