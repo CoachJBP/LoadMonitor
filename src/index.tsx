@@ -475,6 +475,7 @@ function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
   const [sessionDate, setSessionDate] = useState(todayKey());
   const [sessionType, setSessionType] = useState("Training");
   const [duration, setDuration] = useState(75);
+  const [targetRpe, setTargetRpe] = useState(5);
   const [attendanceMap, setAttendanceMap] = useState({});
 
   useEffect(() => {
@@ -510,6 +511,8 @@ const supabasePayload = payload.map((entry) => ({
   session_type: entry.sessionType,
   attendance: entry.attendance,
   duration: entry.duration,
+  planned_load: entry.duration * targetRpe,
+  target_rpe: targetRpe,
 }));
 
 const { error: deleteError } = await supabase
