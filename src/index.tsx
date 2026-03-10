@@ -1232,6 +1232,43 @@ const loadRpeEntries = async () => {
 useEffect(() => {
   loadRpeEntries();
 }, []);
+
+const loadSessionSetup = async () => {
+  const { data, error } = await supabase
+    .from("session_setup")
+    .select("*")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("LOAD SESSION SETUP ERROR:", error);
+    return;
+  }
+
+  if (data) {
+    const mapped = data.map((entry) => ({
+      playerId: entry.player_id,
+      date: entry.session_date,
+      sessionType: entry.session_type || "Training",
+      attendance: entry.attendance || "Present",
+      duration: Number(entry.duration || 0),
+      rpe: 0,
+      comment: "",
+      bodyCheck: "None",
+      painArea: "",
+      load: 0,
+    }));
+
+    setSessionEntries((prev) => {
+      const rpeOnly = prev.filter((entry) => entry.rpe && entry.rpe > 0);
+      return [...mapped, ...rpeOnly];
+    });
+  }
+};
+
+useEffect(() => {
+  loadSessionSetup();
+}, []);
+  
 const addPlayer = async () => {
   if (!newPlayer.name.trim()) return;
 
