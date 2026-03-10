@@ -204,6 +204,7 @@ function PlayerForm({
   setWellnessEntries,
   setSessionEntries,
   loadWellnessEntries,
+  loadRpeEntries,
 }) {
   const [wellness, setWellness] = useState({ sleep: 4, fatigue: 2, soreness: 2, stress: 2, mood: 4, freshness: 4, comment: "" });
   const [rpe, setRpe] = useState({ duration: 0, rpe: 6, comment: "", bodyCheck: "None", painArea: "", attendance: "Present", sessionType: "Training" });
@@ -285,6 +286,7 @@ await loadWellnessEntries();
   }
 
   console.log("SAVE RPE OK:", data);
+    await loadRpeEntries();
 };
 
   return (
@@ -819,37 +821,38 @@ export default function PlayerLoadMonitorApp() {
 }, []);
   useEffect(() => {
   const loadRpeEntries = async () => {
-    const { data, error } = await supabase
-      .from("rpe_entries")
-      .select("*")
-      .order("id", { ascending: true });
+  const { data, error } = await supabase
+    .from("rpe_entries")
+    .select("*")
+    .order("id", { ascending: true });
 
-    if (error) {
-      console.error("LOAD RPE ERROR:", error);
-      return;
-    }
+  if (error) {
+    console.error("LOAD RPE ERROR:", error);
+    return;
+  }
 
-    if (data) {
-      const mapped = data.map((entry) => ({
-        playerId: entry.player_id,
-        date: entry.created_at ? entry.created_at.slice(0, 10) : todayKey(),
-        rpe: entry.rpe,
-        duration: 0,
-        attendance: entry.attendance
-          ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
-          : "Present",
-        bodyCheck: entry.soreness_level
-          ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
-          : "None",
-        painArea: entry.pain_comment || "",
-        comment: "",
-        sessionType: "Training",
-        load: 0,
-      }));
+  if (data) {
+    const mapped = data.map((entry) => ({
+      playerId: entry.player_id,
+      date: entry.created_at ? entry.created_at.slice(0, 10) : todayKey(),
+      rpe: entry.rpe,
+      duration: 0,
+      attendance: entry.attendance
+        ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
+        : "Present",
+      bodyCheck: entry.soreness_level
+        ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
+        : "None",
+      painArea: entry.pain_comment || "",
+      comment: "",
+      sessionType: "Training",
+      load: 0,
+    }));
 
-      setSessionEntries(mapped);
-    }
-  };
+    setSessionEntries(mapped);
+  }
+};
+  useEffect(() => {
   loadRpeEntries();
 }, []);
 const addPlayer = async () => {
@@ -977,6 +980,7 @@ const addPlayer = async () => {
   setWellnessEntries={setWellnessEntries}
   setSessionEntries={setSessionEntries}
   loadWellnessEntries={loadWellnessEntries}
+  loadRpeEntries={loadRpeEntries}
 />
         )}
       </div>
