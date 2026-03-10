@@ -630,10 +630,79 @@ setSessionEntries((prev) => {
   );
 }
 
-function AdminManualEntry({ players, sessionEntries, wellnessEntries }) {
+function AdminManualEntry({
+  players,
+  sessionEntries,
+  wellnessEntries,
+  setWellnessEntries,
+  loadWellnessEntries,
+}) {
   const [entryPlayerId, setEntryPlayerId] = useState(players[0]?.id || 1);
   const [entryDate, setEntryDate] = useState(todayKey());
 
+  const [manualWellness, setManualWellness] = useState({
+    sleep: 4,
+    fatigue: 2,
+    soreness: 2,
+    stress: 2,
+    mood: 4,
+    freshness: 4,
+    comment: "",
+  });
+
+  useEffect(() => {
+    const existingWellness = wellnessEntries.find(
+      (w) => w.playerId === entryPlayerId && w.date === entryDate
+    );
+
+    if (existingWellness) {
+      setManualWellness({
+        sleep: existingWellness.sleep ?? 4,
+        fatigue: existingWellness.fatigue ?? 2,
+        soreness: existingWellness.soreness ?? 2,
+        stress: existingWellness.stress ?? 2,
+        mood: existingWellness.mood ?? 4,
+        freshness: existingWellness.freshness ?? 4,
+        comment: existingWellness.comment || "",
+      });
+    } else {
+      setManualWellness({
+        sleep: 4,
+        fatigue: 2,
+        soreness: 2,
+        stress: 2,
+        mood: 4,
+        freshness: 4,
+        comment: "",
+      });
+    }
+  }, [entryPlayerId, entryDate, wellnessEntries]);
+const saveManualWellness = async () => {
+  const payload = {
+    player_id: entryPlayerId,
+    entry_date: entryDate,
+    sleep: manualWellness.sleep,
+    fatigue: manualWellness.fatigue,
+    soreness: manualWellness.soreness,
+    stress: manualWellness.stress,
+    mood: manualWellness.mood,
+    freshness: manualWellness.freshness,
+    comment: manualWellness.comment || "",
+  };
+
+  const { error } = await supabase
+    .from("wellness_entries")
+    .upsert([payload], {
+      onConflict: "player_id,entry_date",
+    });
+
+  if (error) {
+    console.error("MANUAL WELLNESS ERROR:", error);
+    return;
+  }
+
+  await loadWellnessEntries();
+};
   return (
     <SectionCard
       title="Admin Manual Entry"
@@ -666,6 +735,60 @@ function AdminManualEntry({ players, sessionEntries, wellnessEntries }) {
           />
         </div>
       </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <RangeField
+          label="Sleep quality"
+          value={manualWellness.sleep}
+          onChange={(v) => setManualWellness({ ...manualWellness, sleep: v })}
+          lowBad
+        />
+        <RangeField
+          label="Fatigue"
+          value={manualWellness.fatigue}
+          onChange={(v) => setManualWellness({ ...manualWellness, fatigue: v })}
+        />
+        <RangeField
+          label="Muscle soreness"
+          value={manualWellness.soreness}
+          onChange={(v) => setManualWellness({ ...manualWellness, soreness: v })}
+        />
+        <RangeField
+          label="Stress"
+          value={manualWellness.stress}
+          onChange={(v) => setManualWellness({ ...manualWellness, stress: v })}
+        />
+        <RangeField
+          label="Mood"
+          value={manualWellness.mood}
+          onChange={(v) => setManualWellness({ ...manualWellness, mood: v })}
+          lowBad
+        />
+        <RangeField
+          label="Freshness"
+          value={manualWellness.freshness}
+          onChange={(v) => setManualWellness({ ...manualWellness, freshness: v })}
+          lowBad
+        />
+      </div>
+
+      <div className="mt-4">
+        <label className="mb-2 block text-sm text-slate-200">Wellness comment</label>
+        <textarea
+          value={manualWellness.comment}
+          onChange={(e) => setManualWellness({ ...manualWellness, comment: e.target.value })}
+          placeholder="Optional note"
+          className="min-h-[96px] w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white outline-none placeholder:text-slate-500"
+        />
+      </div>
+      <div className="mt-4">
+  <button
+    onClick={saveManualWellness}
+    className="rounded-2xl bg-emerald-400 px-4 py-3 font-semibold text-slate-950 hover:scale-[1.01]"
+  >
+    Save wellness entry
+  </button>
+</div>
     </SectionCard>
   );
 }
