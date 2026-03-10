@@ -730,16 +730,31 @@ function StaffDashboard({
 });
 
   const loadByDay = useMemo(() => {
-    const map = {};
-    sessionEntries.forEach((s) => {
-      map[s.date] = map[s.date] || { date: s.date, totalLoad: 0, avgLoad: 0, count: 0 };
-      map[s.date].totalLoad += s.load;
-      map[s.date].count += 1;
-    });
-    return Object.values(map)
-      .map((d) => ({ ...d, avgLoad: Math.round(d.totalLoad / d.count) }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-  }, [sessionEntries]);
+  const map = {};
+
+  sessionEntries.forEach((s) => {
+    map[s.date] = map[s.date] || {
+      date: s.date,
+      totalLoad: 0,
+      plannedLoad: 0,
+      avgLoad: 0,
+      avgPlannedLoad: 0,
+      count: 0,
+    };
+
+    map[s.date].totalLoad += Number(s.load || 0);
+    map[s.date].plannedLoad += Number(s.plannedLoad || 0);
+    map[s.date].count += 1;
+  });
+
+  return Object.values(map)
+    .map((d) => ({
+      ...d,
+      avgLoad: d.count ? Math.round(d.totalLoad / d.count) : 0,
+      avgPlannedLoad: d.count ? Math.round(d.plannedLoad / d.count) : 0,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}, [sessionEntries]);
 const playerLoadHistory = last7Days.map((date) => {
   const entry = sessionEntries.find(
     (s) => s.playerId === historyPlayerId && s.date === date
@@ -822,6 +837,7 @@ const playerLoadHistory = last7Days.map((date) => {
                 <YAxis stroke="#cbd5e1" fontSize={12} />
                 <Tooltip contentStyle={{ background: "#020617", border: "1px solid #334155", borderRadius: 16 }} />
                 <Line type="monotone" dataKey="avgLoad" stroke="#ffffff" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="avgPlannedLoad" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
