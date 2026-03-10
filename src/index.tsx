@@ -810,7 +810,18 @@ if (error) {
     ];
   });
 };
+  
+const wellnessExists = wellnessEntries.some(
+  (w) => w.playerId === entryPlayerId && w.date === entryDate
+);
 
+const rpeExists = sessionEntries.some(
+  (s) =>
+    s.playerId === entryPlayerId &&
+    s.date === entryDate &&
+    Number(s.rpe || 0) > 0
+);
+  
 return (
     <SectionCard
       title="Admin Manual Entry"
@@ -818,6 +829,21 @@ return (
       subtitle="Add or correct wellness and RPE entries for past or missed submissions"
     >
       <div className="grid gap-4 md:grid-cols-[1fr_180px]">
+
+        <div className="mt-3 text-sm text-slate-300">
+  Wellness:{" "}
+  <span className={wellnessExists ? "text-emerald-400" : "text-red-400"}>
+    {wellnessExists ? "OK" : "Missing"}
+  </span>
+
+  {"  |  "}
+
+  RPE:{" "}
+  <span className={rpeExists ? "text-emerald-400" : "text-red-400"}>
+    {rpeExists ? "OK" : "Missing"}
+  </span>
+</div>
+        
         <div>
           <label className="mb-2 block text-sm text-slate-200">Player</label>
           <select
