@@ -819,8 +819,7 @@ export default function PlayerLoadMonitorApp() {
   useEffect(() => {
   loadWellnessEntries();
 }, []);
-  useEffect(() => {
-  const loadRpeEntries = async () => {
+const loadRpeEntries = async () => {
   const { data, error } = await supabase
     .from("rpe_entries")
     .select("*")
@@ -852,7 +851,8 @@ export default function PlayerLoadMonitorApp() {
     setSessionEntries(mapped);
   }
 };
-  useEffect(() => {
+
+useEffect(() => {
   loadRpeEntries();
 }, []);
 const addPlayer = async () => {
