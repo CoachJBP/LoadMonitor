@@ -691,15 +691,13 @@ const saveManualWellness = async () => {
   };
 
   const { error } = await supabase
-    .from("wellness_entries")
-    .upsert([payload], {
-      onConflict: "player_id,entry_date",
-    });
+  .from("wellness_entries")
+  .insert([payload]);
 
-  if (error) {
-    console.error("MANUAL WELLNESS ERROR:", error);
-    return;
-  }
+if (error) {
+  console.error("MANUAL WELLNESS ERROR:", error);
+  return;
+}
 
   await loadWellnessEntries();
 };
