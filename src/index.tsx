@@ -486,7 +486,7 @@ function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
     setAttendanceMap(seeded);
   }, [players, sessionDate, sessionEntries]);
 
-  const saveSessionSetup = () => {
+  const saveSessionSetup = async () => {
     const payload = players.map((player) => {
       const existing = sessionEntries.find((entry) => entry.playerId === player.id && entry.date === sessionDate);
       const attendance = attendanceMap[player.id] || "Present";
@@ -504,7 +504,23 @@ function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
         load: allowed ? Number(duration) * Number(existing?.rpe || 0) : 0,
       };
     });
+const supabasePayload = payload.map((entry) => ({
+  session_date: entry.date,
+  player_id: entry.playerId,
+  session_type: entry.sessionType,
+  attendance: entry.attendance,
+  duration: entry.duration,
+}));
 
+    await supabase
+  .from("session_setup")
+  .delete()
+  .eq("session_date", sessionDate);
+
+await supabase
+  .from("session_setup")
+  .insert(supabasePayload);
+    
     setSessionEntries((prev) => {
       const filtered = prev.filter((entry) => entry.date !== sessionDate);
       return [...filtered, ...payload];
