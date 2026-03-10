@@ -661,12 +661,23 @@ function StaffDashboard({
   const plannedLoad = daySessions.length
     ? Math.round(plannedLoadSum / daySessions.length)
     : 0;
+const plannedSum = daySessions.reduce(
+  (sum, s) => sum + Number(s.plannedLoad || 0),
+  0
+);
 
+const plannedLoad = daySessions.length
+  ? Math.round(plannedSum / daySessions.length)
+  : 0;
+
+const diff = totalLoad - plannedLoad;
+    
   return {
     date,
     wellnessCount,
     totalLoad,
     plannedLoad,
+    diff,
   };
 });
   const todayWellness = players.map((p) => {
