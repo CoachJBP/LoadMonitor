@@ -699,7 +699,7 @@ if (error) {
   return;
 }
 
-  await loadWellnessEntries();
+  console.log("MANUAL WELLNESS SAVED");
 };
   return (
     <SectionCard
