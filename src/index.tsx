@@ -1789,10 +1789,12 @@ if (!session) {
           <div className="grid gap-6">
             <AdminSessionSetup players={players} sessionEntries={sessionEntries} setSessionEntries={setSessionEntries} />
             <AdminManualEntry
-      players={players}
-      sessionEntries={sessionEntries}
-      wellnessEntries={wellnessEntries}
-    />
+  players={players}
+  sessionEntries={sessionEntries}
+  wellnessEntries={wellnessEntries}
+  setWellnessEntries={setWellnessEntries}
+  loadWellnessEntries={loadWellnessEntries}
+/>
             <StaffDashboard
   players={players}
   wellnessEntries={wellnessEntries}
