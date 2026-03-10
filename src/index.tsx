@@ -512,20 +512,32 @@ const supabasePayload = payload.map((entry) => ({
   duration: entry.duration,
 }));
 
-    await supabase
+const { error: deleteError } = await supabase
   .from("session_setup")
   .delete()
   .eq("session_date", sessionDate);
 
-await supabase
+if (deleteError) {
+  console.error("DELETE SESSION SETUP ERROR:", deleteError);
+  return;
+}
+
+const { data: insertedData, error: insertError } = await supabase
   .from("session_setup")
-  .insert(supabasePayload);
-    
-    setSessionEntries((prev) => {
-      const filtered = prev.filter((entry) => entry.date !== sessionDate);
-      return [...filtered, ...payload];
-    });
-  };
+  .insert(supabasePayload)
+  .select();
+
+if (insertError) {
+  console.error("INSERT SESSION SETUP ERROR:", insertError);
+  return;
+}
+
+console.log("SESSION SETUP SAVED:", insertedData);
+
+setSessionEntries((prev) => {
+  const filtered = prev.filter((entry) => entry.date !== sessionDate);
+  return [...filtered, ...payload];
+});
 
   return (
     <SectionCard title="Admin Session Setup" icon={ClipboardList} subtitle="Set the session details and attendance before players submit RPE">
