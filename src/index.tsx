@@ -1300,50 +1300,50 @@ const loadRpeEntries = async () => {
   }
 
   if (data) {
-  setSessionEntries((prev) => {
-    const mapped = data.map((entry) => {
-      const date = entry.created_at ? entry.created_at.slice(0, 10) : todayKey();
+    setSessionEntries((prev) => {
+      const mapped = data.map((entry) => {
+        const date = entry.created_at ? entry.created_at.slice(0, 10) : todayKey();
 
-      const existingSetup = prev.find(
-        (item) => item.playerId === entry.player_id && item.date === date
+        const existingSetup = prev.find(
+          (item) => item.playerId === entry.player_id && item.date === date
+        );
+
+        const duration = Number(existingSetup?.duration || 0);
+        const rpe = Number(entry.rpe || 0);
+
+        return {
+          playerId: entry.player_id,
+          date,
+          rpe,
+          duration,
+          attendance:
+            existingSetup?.attendance ||
+            (entry.attendance
+              ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
+              : "Present"),
+          bodyCheck: entry.soreness_level
+            ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
+            : "None",
+          painArea: entry.pain_comment || "",
+          comment: "",
+          sessionType: existingSetup?.sessionType || "Training",
+          targetRpe: Number(existingSetup?.targetRpe || 0),
+          plannedLoad: Number(existingSetup?.plannedLoad || 0),
+          load: duration * rpe,
+        };
+      });
+
+      const setupOnly = prev.filter(
+        (entry) =>
+          !mapped.some(
+            (rpeEntry) =>
+              rpeEntry.playerId === entry.playerId && rpeEntry.date === entry.date
+          )
       );
 
-      const duration = Number(existingSetup?.duration || 0);
-      const rpe = Number(entry.rpe || 0);
-
-      return {
-  playerId: entry.player_id,
-  date,
-  rpe,
-  duration,
-  attendance: existingSetup?.attendance || (
-    entry.attendance
-      ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
-      : "Present"
-  ),
-  bodyCheck: entry.soreness_level
-    ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
-    : "None",
-  painArea: entry.pain_comment || "",
-  comment: "",
-  sessionType: existingSetup?.sessionType || "Training",
-  targetRpe: Number(existingSetup?.targetRpe || 0),
-  plannedLoad: Number(existingSetup?.plannedLoad || 0),
-  load: duration * rpe,
-};
+      return [...setupOnly, ...mapped];
     });
-
-    const setupOnly = prev.filter(
-      (entry) =>
-        !mapped.some(
-          (rpeEntry) =>
-            rpeEntry.playerId === entry.playerId && rpeEntry.date === entry.date
-        )
-    );
-
-    return [...setupOnly, ...mapped];
-  });
-}
+  }
 };
 
 useEffect(() => {
