@@ -538,7 +538,7 @@ setSessionEntries((prev) => {
   const filtered = prev.filter((entry) => entry.date !== sessionDate);
   return [...filtered, ...payload];
 });
-
+};
   return (
     <SectionCard title="Admin Session Setup" icon={ClipboardList} subtitle="Set the session details and attendance before players submit RPE">
       <div className="grid gap-4 xl:grid-cols-[180px_180px_180px_1fr]">
