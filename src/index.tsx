@@ -591,17 +591,22 @@ function StaffDashboard({ players, wellnessEntries, sessionEntries, setHistoryPl
     if (todaySession?.bodyCheck && todaySession.bodyCheck !== "None") flags.push(`Body check: ${todaySession.bodyCheck}`);
 
     return {
-      ...p,
-      readiness: scoreReadiness(entry),
-      comment: entry?.comment || "",
-      sleep: entry?.sleep ?? null,
-      load7,
-      load15,
-      load30,
-      attendance30,
-      todaySession,
-      flags,
-    };
+  ...p,
+  readiness: scoreReadiness(entry),
+  comment: entry?.comment || "",
+  sleep: entry?.sleep ?? null,
+  fatigue: entry?.fatigue ?? null,
+  soreness: entry?.soreness ?? null,
+  stress: entry?.stress ?? null,
+  mood: entry?.mood ?? null,
+  freshness: entry?.freshness ?? null,
+  load7,
+  load15,
+  load30,
+  attendance30,
+  todaySession,
+  flags,
+};
   });
 
   const atRisk = todayWellness.filter((p) => p.readiness !== null && p.readiness < 60);
@@ -725,6 +730,42 @@ function StaffDashboard({ players, wellnessEntries, sessionEntries, setHistoryPl
           </table>
         </div>
       </SectionCard>
+      <SectionCard
+  title="Wellness Details Today"
+  icon={HeartPulse}
+  subtitle="Full wellness breakdown for each player"
+>
+  <div className="overflow-hidden rounded-3xl border border-white/10">
+    <table className="min-w-full divide-y divide-white/10 text-sm">
+      <thead className="bg-white/5 text-left text-slate-300">
+        <tr>
+          <th className="px-4 py-3">Player</th>
+          <th className="px-4 py-3">Sleep</th>
+          <th className="px-4 py-3">Fatigue</th>
+          <th className="px-4 py-3">Soreness</th>
+          <th className="px-4 py-3">Stress</th>
+          <th className="px-4 py-3">Mood</th>
+          <th className="px-4 py-3">Freshness</th>
+          <th className="px-4 py-3">Comment</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+        {todayWellness.map((p) => (
+          <tr key={`wellness-${p.id}`}>
+            <td className="px-4 py-3 font-medium">{p.name}</td>
+            <td className="px-4 py-3">{p.sleep ?? "--"}</td>
+            <td className="px-4 py-3">{p.fatigue ?? "--"}</td>
+            <td className="px-4 py-3">{p.soreness ?? "--"}</td>
+            <td className="px-4 py-3">{p.stress ?? "--"}</td>
+            <td className="px-4 py-3">{p.mood ?? "--"}</td>
+            <td className="px-4 py-3">{p.freshness ?? "--"}</td>
+            <td className="px-4 py-3 text-slate-300">{p.comment || "—"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</SectionCard>
     </div>
   );
 }
