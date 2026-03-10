@@ -743,7 +743,7 @@ export default function PlayerLoadMonitorApp() {
   const [selectedPlayerId, setSelectedPlayerId] = useState(1);
   const [historyPlayerId, setHistoryPlayerId] = useState(1);
   const [wellnessEntries, setWellnessEntries] = useState(seedWellness);
-  const [sessionEntries, setSessionEntries] = useLocalState("ppl-session-v1", seedSessions);
+  const [sessionEntries, setSessionEntries] = useState([]);
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "" });
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
@@ -793,16 +793,21 @@ export default function PlayerLoadMonitorApp() {
 
     if (data) {
       const mapped = data.map((entry) => ({
-        playerId: entry.player_id,
-        date: entry.entry_date,
-        sleep: entry.sleep,
-        fatigue: entry.fatigue,
-        soreness: entry.soreness,
-        stress: entry.stress,
-        mood: entry.mood,
-        freshness: entry.freshness,
-        comment: entry.comment || "",
-      }));
+  playerId: entry.player_id,
+  date: entry.created_at ? entry.created_at.slice(0, 10) : todayKey(),
+  rpe: entry.rpe,
+  duration: 0,
+  attendance: entry.attendance
+    ? entry.attendance.charAt(0).toUpperCase() + entry.attendance.slice(1)
+    : "Present",
+  bodyCheck: entry.soreness_level
+    ? entry.soreness_level.charAt(0).toUpperCase() + entry.soreness_level.slice(1)
+    : "None",
+  painArea: entry.pain_comment || "",
+  comment: "",
+  sessionType: "Training",
+  load: 0,
+}));
 
       setWellnessEntries(mapped);
     }
