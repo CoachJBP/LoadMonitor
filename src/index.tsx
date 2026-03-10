@@ -544,7 +544,7 @@ setSessionEntries((prev) => {
 };
   return (
     <SectionCard title="Admin Session Setup" icon={ClipboardList} subtitle="Set the session details and attendance before players submit RPE">
-      <div className="grid gap-4 xl:grid-cols-[180px_180px_180px_1fr]">
+      <div className="grid gap-4 xl:grid-cols-[180px_180px_180px_180px_1fr]">
         <div>
           <label className="mb-2 block text-sm text-slate-200">Date</label>
           <input
@@ -576,6 +576,17 @@ setSessionEntries((prev) => {
             className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
           />
         </div>
+        <div>
+  <label className="mb-2 block text-sm text-slate-200">Target RPE</label>
+  <input
+    type="number"
+    min="1"
+    max="10"
+    value={targetRpe}
+    onChange={(e) => setTargetRpe(Number(e.target.value))}
+    className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
+  />
+</div>
         <div className="flex items-end">
           <button onClick={saveSessionSetup} className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
             Save session setup
