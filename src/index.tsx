@@ -860,6 +860,9 @@ export default function PlayerLoadMonitorApp() {
 const [authLoading, setAuthLoading] = useState(true);
   const [currentProfile, setCurrentProfile] = useState(null);
 const [profileLoading, setProfileLoading] = useState(true);
+  const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+const [loginError, setLoginError] = useState("");
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
@@ -1056,11 +1059,48 @@ const addPlayer = async () => {
   return <div className="p-10 text-white">Loading profile...</div>;
 }
 if (!session) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
 
   const handleLogin = async () => {
+    setLoginError("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoginError(error.message);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+      <div className="bg-slate-800 p-6 rounded-2xl w-80 space-y-4">
+
+        <h2 className="text-lg font-bold">Login</h2>
+
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button onClick={handleLogin}>
+          Login
+        </button>
+
+        {loginError && <div>{loginError}</div>}
+
+      </div>
+    </div>
+  );
+}
     setLoginError("");
 
     const { error } = await supabase.auth.signInWithPassword({
