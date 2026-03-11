@@ -1437,6 +1437,17 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
     rpe: session ? Number(session.rpe || 0) : 0,
   };
 });
+
+  const playerReadinessTrend = getLast7Days(todayKey()).map((date) => {
+  const wellness = wellnessEntries.find(
+    (w) => w.playerId === selectedPlayer.id && w.date === date
+  );
+
+  return {
+    date,
+    readiness: wellness ? scoreReadiness(wellness) : null,
+  };
+});
   
   const attendance = attendanceSummary(sessionEntries, selectedPlayer.id, 30);
 
@@ -1523,39 +1534,74 @@ if (
     </div>
 
     <div className="mt-6">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-        <div className="mb-4">
-          <p className="text-sm font-semibold text-white">Load Trend</p>
-          <p className="text-sm text-slate-400">
-            Last 7 days internal load for {selectedPlayer.name}
-          </p>
-        </div>
-
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={playerLoadTrend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
-              <YAxis stroke="#cbd5e1" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  background: "#020617",
-                  border: "1px solid #334155",
-                  borderRadius: 16,
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="load"
-                stroke="#fcd34d"
-                strokeWidth={3}
-                dot={{ r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+    <div className="mb-4">
+      <p className="text-sm font-semibold text-white">Load Trend</p>
+      <p className="text-sm text-slate-400">
+        Last 7 days internal load for {selectedPlayer.name}
+      </p>
     </div>
+
+    <div className="h-72 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={playerLoadTrend}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+          <YAxis stroke="#cbd5e1" fontSize={12} />
+          <Tooltip
+            contentStyle={{
+              background: "#020617",
+              border: "1px solid #334155",
+              borderRadius: 16,
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="load"
+            stroke="#fcd34d"
+            strokeWidth={3}
+            dot={{ r: 4 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+
+  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+    <div className="mb-4">
+      <p className="text-sm font-semibold text-white">Readiness Trend</p>
+      <p className="text-sm text-slate-400">
+        Last 7 days readiness score for {selectedPlayer.name}
+      </p>
+    </div>
+
+    <div className="h-72 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={playerReadinessTrend}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+          <YAxis domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
+          <Tooltip
+            contentStyle={{
+              background: "#020617",
+              border: "1px solid #334155",
+              borderRadius: 16,
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="readiness"
+            stroke="#34d399"
+            strokeWidth={3}
+            dot={{ r: 4 }}
+            connectNulls={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+</div>
 
     <div className="mt-6 grid gap-6 xl:grid-cols-2">
       <div className="overflow-hidden rounded-3xl border border-white/10">
