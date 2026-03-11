@@ -2013,13 +2013,11 @@ if (!session) {
 
   <div className="flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between">
     <div className="flex items-center gap-4">
-      <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-3">
-        <img
-          src="/bonivital-logo.png"
-          alt="Bonivital"
-          className="h-14 w-14 object-contain"
-        />
-      </div>
+      <img
+  src="/bonivital-logo.png"
+  alt="Bonivital"
+  className="h-14 w-14 object-contain"
+/>
 
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-amber-300">
