@@ -1503,6 +1503,9 @@ const [signupName, setSignupName] = useState("");
 const [signupPosition, setSignupPosition] = useState("");
 const [signupRole, setSignupRole] = useState("player");
 
+  const [authLoadingAction, setAuthLoadingAction] = useState(false);
+const [authSuccessMessage, setAuthSuccessMessage] = useState("");
+  
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
   const isAdmin = currentProfile?.role === "admin";
@@ -1822,55 +1825,73 @@ const addPlayer = async () => {
 }
 if (!session) {
 
-  const handleLogin = async () => {
-    setLoginError("");
+ const handleLogin = async () => {
+  setLoginError("");
+  setAuthSuccessMessage("");
+  setAuthLoadingAction(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (error) {
-      setLoginError(error.message);
-    }
-  };
+  if (error) {
+    setLoginError(error.message);
+  }
+
+  setAuthLoadingAction(false);
+};
 
   const handleSignUp = async () => {
-    setLoginError("");
+  setLoginError("");
+  setAuthSuccessMessage("");
+  setAuthLoadingAction(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
-    if (error) {
-      setLoginError(error.message);
-      return;
-    }
+  if (error) {
+    setLoginError(error.message);
+    setAuthLoadingAction(false);
+    return;
+  }
 
-    const userId = data?.user?.id;
+  const userId = data?.user?.id;
 
-    if (!userId) {
-      setLoginError("Signup succeeded but no user ID was returned.");
-      return;
-    }
+  if (!userId) {
+    setLoginError("Signup succeeded but no user ID was returned.");
+    setAuthLoadingAction(false);
+    return;
+  }
 
-    const { error: profileError } = await supabase
-      .from("players")
-      .insert([
-        {
-          user_id: userId,
-          name: signupName.trim(),
-          position: signupPosition.trim() || "N/A",
-          role: signupRole,
-        },
-      ]);
+  const { error: profileError } = await supabase
+    .from("players")
+    .insert([
+      {
+        user_id: userId,
+        name: signupName.trim(),
+        position: signupPosition.trim() || "N/A",
+        role: signupRole,
+      },
+    ]);
 
-    if (profileError) {
-      setLoginError(profileError.message);
-      return;
-    }
-  };
+  if (profileError) {
+    setLoginError(profileError.message);
+    setAuthLoadingAction(false);
+    return;
+  }
+
+  setAuthSuccessMessage("Account created successfully. You can now log in.");
+  setAuthMode("login");
+  setSignupName("");
+  setSignupPosition("");
+  setSignupRole("player");
+  setEmail("");
+  setPassword("");
+  setAuthLoadingAction(false);
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
@@ -1947,14 +1968,36 @@ if (!session) {
   className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
 />
 
-       <button
+      <button
   onClick={authMode === "login" ? handleLogin : handleSignUp}
-  className="w-full bg-white text-black rounded-xl p-3 font-semibold"
+  disabled={authLoadingAction}
+  className={cn(
+    "w-full rounded-xl p-3 font-semibold",
+    authLoadingAction
+      ? "cursor-not-allowed bg-slate-500 text-white"
+      : "bg-white text-black"
+  )}
 >
-  {authMode === "login" ? "Login" : "Create account"}
+  {authLoadingAction
+    ? authMode === "login"
+      ? "Logging in..."
+      : "Creating account..."
+    : authMode === "login"
+      ? "Login"
+      : "Create account"}
 </button>
 
-        {loginError && <div>{loginError}</div>}
+        {loginError && (
+  <div className="text-sm text-red-400">
+    {loginError}
+  </div>
+)}
+
+{authSuccessMessage && (
+  <div className="text-sm text-emerald-400">
+    {authSuccessMessage}
+  </div>
+)}
 
       </div>
     </div>
