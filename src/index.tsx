@@ -1428,7 +1428,38 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
   const attendance = attendanceSummary(sessionEntries, selectedPlayer.id, 30);
 
   return (
-    <SectionCard title="Player History" icon={Users} subtitle={`Individual monitoring view for ${selectedPlayer.name}`}>
+  <SectionCard title="Player Profile" icon={Users} subtitle={`Performance overview for ${selectedPlayer.name}`}>
+    <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-5">
+  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div>
+      <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+        Player Overview
+      </p>
+      <h2 className="mt-1 text-2xl font-bold text-white">
+        {selectedPlayer.name}
+      </h2>
+      <p className="mt-1 text-sm text-slate-400">
+        Position: {selectedPlayer.position}
+      </p>
+    </div>
+
+    <div className="flex flex-wrap gap-3">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
+        <p className="text-xs text-slate-400">Current status</p>
+        <p className="text-sm font-semibold text-white">
+          Monitoring active
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
+        <p className="text-xs text-slate-400">Profile type</p>
+        <p className="text-sm font-semibold text-white">
+          Performance tracking
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard label="Load 7d" value={loads.load7} hint="Rolling window" tone="blue" />
         <StatCard label="Load 15d" value={loads.load15} hint="Rolling window" tone="blue" />
