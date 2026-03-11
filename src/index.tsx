@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { jsPDF } from "jspdf";
 import { Activity, AlertTriangle, BarChart3, ClipboardList, HeartPulse, Moon, Timer, Users } from "lucide-react";
 import {
   LineChart,
