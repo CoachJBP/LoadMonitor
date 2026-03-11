@@ -45,13 +45,41 @@ const withinLastDays = (dateStr, days) => dateStr >= daysAgoKey(days - 1);
 
 const scoreReadiness = (w) => {
   if (!w) return null;
+
   const sleep = Number(w.sleep || 0);
   const mood = Number(w.mood || 0);
   const freshness = Number(w.freshness || 0);
+
   const fatigue = 6 - Number(w.fatigue || 1);
   const soreness = 6 - Number(w.soreness || 1);
   const stress = 6 - Number(w.stress || 1);
-  return Math.round(((sleep + mood + freshness + fatigue + soreness + stress) / 30) * 100);
+
+  const weights = {
+    sleep: 1.5,
+    mood: 1,
+    freshness: 1.5,
+    fatigue: 2,
+    soreness: 2,
+    stress: 1,
+  };
+
+  const weightedSum =
+    sleep * weights.sleep +
+    mood * weights.mood +
+    freshness * weights.freshness +
+    fatigue * weights.fatigue +
+    soreness * weights.soreness +
+    stress * weights.stress;
+
+  const maxScore =
+    5 * weights.sleep +
+    5 * weights.mood +
+    5 * weights.freshness +
+    5 * weights.fatigue +
+    5 * weights.soreness +
+    5 * weights.stress;
+
+  return Math.round((weightedSum / maxScore) * 100);
 };
 
 const sumLoads = (entries, playerId, days) =>
