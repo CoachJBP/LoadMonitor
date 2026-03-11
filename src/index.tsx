@@ -2008,86 +2008,91 @@ if (!session) {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.15),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.10),_transparent_20%),linear-gradient(180deg,_#020617,_#0f172a)] text-white">
       <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
         
-        <div className="mb-8 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20 backdrop-blur md:flex-row md:items-center md:justify-between">
-  <div className="flex items-center gap-4">
-    <img
-      src="/bonivital-logo.png"
-      alt="Bonivital"
-      className="h-14 w-14 object-contain"
-    />
+        <div className="mb-8 overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl shadow-black/20 backdrop-blur">
+  <div className="h-1.5 w-full bg-gradient-to-r from-blue-950 via-amber-300 to-red-500" />
 
-    <div>
-      <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
-        Bonivital SC
-      </p>
-      <h1 className="text-2xl font-bold text-white md:text-3xl">
-        Bonivital Performance Monitor
-      </h1>
-      <p className="text-sm text-slate-400">
-        Load · Wellness · Readiness · Staff Dashboard
-      </p>
+  <div className="flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between">
+    <div className="flex items-center gap-4">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-3">
+        <img
+          src="/bonivital-logo.png"
+          alt="Bonivital"
+          className="h-14 w-14 object-contain"
+        />
+      </div>
+
+      <div>
+        <p className="text-xs uppercase tracking-[0.3em] text-amber-300">
+          Bonivital SC
+        </p>
+        <h1 className="text-2xl font-bold text-white md:text-3xl">
+          Performance Monitor
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Internal Load · Wellness · Readiness · Staff Dashboard
+        </p>
+      </div>
+    </div>
+
+    <div className="flex flex-wrap gap-3 items-center">
+      {isAdmin ? (
+        <>
+          <button
+            onClick={() => setMode("staff")}
+            className={cn(
+              "rounded-2xl px-4 py-3 text-sm font-semibold transition",
+              mode === "staff"
+                ? "bg-white text-slate-950"
+                : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+            )}
+          >
+            Staff Dashboard
+          </button>
+
+          <button
+            onClick={() => setMode("player")}
+            className={cn(
+              "rounded-2xl px-4 py-3 text-sm font-semibold transition",
+              mode === "player"
+                ? "bg-amber-300 text-slate-950"
+                : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+            )}
+          >
+            Player Check-In
+          </button>
+
+          <button
+            onClick={handleExportWellness}
+            className="rounded-2xl px-4 py-4 text-sm font-semibold border border-emerald-400/30 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/40"
+          >
+            Export Wellness CSV
+          </button>
+
+          <button
+            onClick={handleExportRpe}
+            className="rounded-2xl px-4 py-4 text-sm font-semibold border border-amber-300/30 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+          >
+            Export RPE CSV
+          </button>
+        </>
+      ) : (
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-200">
+          Logged in as player
+        </div>
+      )}
+
+      <button
+        onClick={async () => {
+          await supabase.auth.signOut();
+          window.location.reload();
+        }}
+        className="rounded-2xl border border-red-400/30 bg-red-500/20 px-4 py-3 text-sm font-semibold text-red-200 hover:bg-red-500/40"
+      >
+        Logout
+      </button>
     </div>
   </div>
-
-  <div className="flex flex-wrap gap-3 items-center">
-    {isAdmin ? (
-      <>
-        <button
-          onClick={() => setMode("staff")}
-          className={cn(
-            "rounded-2xl px-4 py-3 text-sm font-semibold transition",
-            mode === "staff"
-              ? "bg-white text-slate-950"
-              : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
-          )}
-        >
-          Staff Dashboard
-        </button>
-
-        <button
-          onClick={() => setMode("player")}
-          className={cn(
-            "rounded-2xl px-4 py-3 text-sm font-semibold transition",
-            mode === "player"
-  ? "bg-amber-300 text-slate-950"
-              : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
-          )}
-        >
-          Player Check-In
-        </button>
-
-        <button
-          onClick={handleExportWellness}
-          className="rounded-2xl px-4 py-4 text-sm font-semibold border border-amber-300/30 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
-        >
-          Export Wellness CSV
-        </button>
-
-        <button
-          onClick={handleExportRpe}
-          className="rounded-2xl px-4 py-4 text-sm font-semibold border border-sky-400/30 bg-sky-500/20 text-sky-200 hover:bg-sky-500/40"
-        >
-          Export RPE CSV
-        </button>
-      </>
-    ) : (
-      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-200">
-        Logged in as player
-      </div>
-    )}
-
-    <button
-      onClick={async () => {
-        await supabase.auth.signOut();
-        window.location.reload();
-      }}
-      className="rounded-2xl border border-red-400/30 bg-red-500/20 px-4 py-3 text-sm font-semibold text-red-200 hover:bg-red-500/40"
-    >
-      Logout
-    </button>
-  </div>
 </div>
-
         <div className="mb-6 grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <p className="text-sm text-slate-400">Demo squad</p>
