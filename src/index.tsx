@@ -1166,13 +1166,33 @@ const loadByDay = useMemo(() => {
 }, [sessionEntries, last4Days]);
   
 const playerLoadHistory = last7Days.map((date) => {
-  const entry = sessionEntries.find(
-    (s) => s.playerId === historyPlayerId && s.date === date
+  const daySessions = sessionEntries.filter((s) => s.date === date);
+
+  const selectedPlayerEntry = daySessions.find(
+    (s) => s.playerId === historyPlayerId
   );
+
+  const otherPlayers = daySessions.filter(
+    (s) => s.playerId !== historyPlayerId && Number(s.rpe || 0) > 0
+  );
+
+  const otherPlayersAverage = otherPlayers.length
+    ? Math.round(
+        otherPlayers.reduce((sum, s) => sum + Number(s.load || 0), 0) /
+          otherPlayers.length
+      )
+    : 0;
+
+  const targetLoad =
+    selectedPlayerEntry && Number(selectedPlayerEntry.plannedLoad || 0) > 0
+      ? Number(selectedPlayerEntry.plannedLoad || 0)
+      : 0;
 
   return {
     date,
-    load: entry ? Number(entry.load || 0) : 0,
+    selectedLoad: selectedPlayerEntry ? Number(selectedPlayerEntry.load || 0) : 0,
+    squadAverageLoad: otherPlayersAverage,
+    targetLoad,
   };
 });
   const readinessBars = todayWellness
@@ -1302,6 +1322,23 @@ const playerLoadHistory = last7Days.map((date) => {
   icon={BarChart3}
   subtitle="7-day window from selected date"
 >
+        <div className="mb-3 flex gap-4 text-sm text-slate-300">
+  <div className="flex items-center gap-2">
+    <span className="inline-block h-3 w-3 rounded-full bg-sky-400" />
+    <span>Selected Player</span>
+  </div>
+
+  <div className="flex items-center gap-2">
+    <span className="inline-block h-3 w-3 rounded-full bg-white" />
+    <span>Other Players Average</span>
+  </div>
+
+  <div className="flex items-center gap-2">
+    <span className="inline-block h-3 w-3 rounded-full bg-amber-300" />
+    <span>Target Load</span>
+  </div>
+</div>
+        
   <div className="h-72 w-full">
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={playerLoadHistory}>
@@ -1316,12 +1353,28 @@ const playerLoadHistory = last7Days.map((date) => {
           }}
         />
         <Line
-          type="monotone"
-          dataKey="load"
-          stroke="#38bdf8"
-          strokeWidth={3}
-          dot={{ r: 4 }}
-        />
+  type="monotone"
+  dataKey="selectedLoad"
+  stroke="#38bdf8"
+  strokeWidth={3}
+  dot={{ r: 4 }}
+/>
+
+<Line
+  type="monotone"
+  dataKey="squadAverageLoad"
+  stroke="#ffffff"
+  strokeWidth={2}
+  dot={{ r: 3 }}
+/>
+
+<Line
+  type="monotone"
+  dataKey="targetLoad"
+  stroke="#fcd34d"
+  strokeWidth={2}
+  dot={{ r: 3 }}
+/>
       </LineChart>
     </ResponsiveContainer>
   </div>
