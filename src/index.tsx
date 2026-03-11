@@ -1918,8 +1918,12 @@ const [signupRole, setSignupRole] = useState("player");
   const [authLoadingAction, setAuthLoadingAction] = useState(false);
 const [authSuccessMessage, setAuthSuccessMessage] = useState("");
   
-  const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
-  const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
+  const selectedPlayer = isAdmin
+  ? players.find((p) => p.id === selectedPlayerId) || players[0]
+  : players.find((p) => p.id === currentProfile?.id) || currentProfile || players[0];
+  const historyPlayer = isAdmin
+  ? players.find((p) => p.id === historyPlayerId) || selectedPlayer
+  : selectedPlayer;
   const isAdmin = currentProfile?.role === "admin";
 
   const exportToCsv = (filename, rows) => {
@@ -2065,13 +2069,16 @@ const handleExportRpe = () => {
 
     if (data && data.length > 0) {
       setPlayers(data);
-      setSelectedPlayerId(data[0].id);
-      setHistoryPlayerId(data[0].id);
+
+      if (!currentProfile || currentProfile.role === "admin") {
+        setSelectedPlayerId(data[0].id);
+        setHistoryPlayerId(data[0].id);
+      }
     }
   };
 
   loadPlayers();
-}, []);
+}, [currentProfile]);
   const loadWellnessEntries = async () => {
   const { data, error } = await supabase
     .from("wellness_entries")
