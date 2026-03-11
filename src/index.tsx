@@ -1610,7 +1610,7 @@ if (
     </div>
   </SectionCard>
 );
-
+}
 export default function PlayerLoadMonitorApp() {
   const [mode, setMode] = useState("staff");
   const [players, setPlayers] = useState(DEFAULT_PLAYERS);
