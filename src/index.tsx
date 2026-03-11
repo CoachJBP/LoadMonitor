@@ -1297,9 +1297,9 @@ const playerLoadHistory = last7Days.map((date) => {
       </div>
 
       <SectionCard
-  title="Player load history"
+  title="Selected Player Load History"
   icon={BarChart3}
-  subtitle="Last 7 days for selected player"
+  subtitle="Rolling 7-day cycle (from selected date)"
 >
   <div className="h-72 w-full">
     <ResponsiveContainer width="100%" height="100%">
