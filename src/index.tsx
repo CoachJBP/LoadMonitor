@@ -1498,6 +1498,11 @@ const [profileLoading, setProfileLoading] = useState(true);
 const [password, setPassword] = useState("");
 const [loginError, setLoginError] = useState("");
 
+  const [authMode, setAuthMode] = useState("login");
+const [signupName, setSignupName] = useState("");
+const [signupPosition, setSignupPosition] = useState("");
+const [signupRole, setSignupRole] = useState("player");
+
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId) || players[0];
   const historyPlayer = players.find((p) => p.id === historyPlayerId) || selectedPlayer;
   const isAdmin = currentProfile?.role === "admin";
@@ -1818,6 +1823,42 @@ const addPlayer = async () => {
 if (!session) {
 
   const handleLogin = async () => {
+    const handleSignUp = async () => {
+  setLoginError("");
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    setLoginError(error.message);
+    return;
+  }
+
+  const userId = data?.user?.id;
+
+  if (!userId) {
+    setLoginError("Signup succeeded but no user ID was returned.");
+    return;
+  }
+
+  const { error: profileError } = await supabase
+    .from("players")
+    .insert([
+      {
+        user_id: userId,
+        name: signupName.trim(),
+        position: signupPosition.trim() || "N/A",
+        role: signupRole,
+      },
+    ]);
+
+  if (profileError) {
+    setLoginError(profileError.message);
+    return;
+  }
+};
     
     setLoginError("");
 
@@ -1835,8 +1876,61 @@ if (!session) {
     <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
       <div className="bg-slate-800 p-6 rounded-2xl w-80 space-y-4">
 
-        <h2 className="text-lg font-bold">Login</h2>
+        <div className="flex gap-2">
+  <button
+    onClick={() => setAuthMode("login")}
+    className={cn(
+      "flex-1 rounded-xl p-2 font-semibold",
+      authMode === "login"
+        ? "bg-white text-black"
+        : "bg-slate-900 text-white border border-white/10"
+    )}
+  >
+    Log in
+  </button>
 
+  <button
+    onClick={() => setAuthMode("signup")}
+    className={cn(
+      "flex-1 rounded-xl p-2 font-semibold",
+      authMode === "signup"
+        ? "bg-white text-black"
+        : "bg-slate-900 text-white border border-white/10"
+    )}
+  >
+    Sign up
+  </button>
+</div>
+
+{authMode === "signup" && (
+  <>
+    <input
+      type="text"
+      placeholder="Full name"
+      value={signupName}
+      onChange={(e) => setSignupName(e.target.value)}
+      className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+    />
+
+    <input
+      type="text"
+      placeholder="Position / Role title"
+      value={signupPosition}
+      onChange={(e) => setSignupPosition(e.target.value)}
+      className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+    />
+
+    <select
+      value={signupRole}
+      onChange={(e) => setSignupRole(e.target.value)}
+      className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+    >
+      <option value="player">Player</option>
+      <option value="staff">Staff</option>
+    </select>
+  </>
+)}
+        
        <input
   type="email"
   placeholder="Email"
@@ -1854,10 +1948,10 @@ if (!session) {
 />
 
        <button
-  onClick={handleLogin}
+  onClick={authMode === "login" ? handleLogin : handleSignUp}
   className="w-full bg-white text-black rounded-xl p-3 font-semibold"
 >
-  Login
+  {authMode === "login" ? "Login" : "Create account"}
 </button>
 
         {loginError && <div>{loginError}</div>}
