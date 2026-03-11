@@ -2016,7 +2016,7 @@ if (!session) {
       <img
   src="/bonivital-logo.png"
   alt="Bonivital"
-  className="h-14 w-14 object-contain"
+  className="h-16 w-16 object-contain"
 />
 
       <div>
