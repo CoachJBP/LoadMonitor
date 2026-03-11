@@ -1918,13 +1918,15 @@ const [signupRole, setSignupRole] = useState("player");
   const [authLoadingAction, setAuthLoadingAction] = useState(false);
 const [authSuccessMessage, setAuthSuccessMessage] = useState("");
   
-  const selectedPlayer = isAdmin
+  const isAdmin = currentProfile?.role === "admin";
+
+const selectedPlayer = isAdmin
   ? players.find((p) => p.id === selectedPlayerId) || players[0]
   : players.find((p) => p.id === currentProfile?.id) || currentProfile || players[0];
-  const historyPlayer = isAdmin
+
+const historyPlayer = isAdmin
   ? players.find((p) => p.id === historyPlayerId) || selectedPlayer
   : selectedPlayer;
-  const isAdmin = currentProfile?.role === "admin";
 
   const exportToCsv = (filename, rows) => {
   if (!rows || !rows.length) return;
