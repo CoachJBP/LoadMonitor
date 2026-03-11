@@ -1425,6 +1425,19 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
     load15: sumLoads(sessionEntries, selectedPlayer.id, 15),
     load30: sumLoads(sessionEntries, selectedPlayer.id, 30),
   };
+
+  const playerLoadTrend = getLast7Days(todayKey()).map((date) => {
+  const session = sessionEntries.find(
+    (s) => s.playerId === selectedPlayer.id && s.date === date
+  );
+
+  return {
+    date,
+    load: session ? Number(session.load || 0) : 0,
+    rpe: session ? Number(session.rpe || 0) : 0,
+  };
+});
+  
   const attendance = attendanceSummary(sessionEntries, selectedPlayer.id, 30);
 
   return (
@@ -1467,6 +1480,41 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
         <StatCard label="Attendance 30d" value={`${attendance.percent}%`} hint={`${attendance.attended}/${attendance.total} sessions`} tone="green" />
       </div>
 
+    <div className="mt-6">
+  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+    <div className="mb-4">
+      <p className="text-sm font-semibold text-white">Load Trend</p>
+      <p className="text-sm text-slate-400">
+        Last 7 days internal load for {selectedPlayer.name}
+      </p>
+    </div>
+
+    <div className="h-72 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={playerLoadTrend}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+          <YAxis stroke="#cbd5e1" fontSize={12} />
+          <Tooltip
+            contentStyle={{
+              background: "#020617",
+              border: "1px solid #334155",
+              borderRadius: 16,
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="load"
+            stroke="#fcd34d"
+            strokeWidth={3}
+            dot={{ r: 4 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+</div>
+    
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <div className="overflow-hidden rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
