@@ -1823,43 +1823,6 @@ const addPlayer = async () => {
 if (!session) {
 
   const handleLogin = async () => {
-    const handleSignUp = async () => {
-  setLoginError("");
-
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (error) {
-    setLoginError(error.message);
-    return;
-  }
-
-  const userId = data?.user?.id;
-
-  if (!userId) {
-    setLoginError("Signup succeeded but no user ID was returned.");
-    return;
-  }
-
-  const { error: profileError } = await supabase
-    .from("players")
-    .insert([
-      {
-        user_id: userId,
-        name: signupName.trim(),
-        position: signupPosition.trim() || "N/A",
-        role: signupRole,
-      },
-    ]);
-
-  if (profileError) {
-    setLoginError(profileError.message);
-    return;
-  }
-};
-    
     setLoginError("");
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -1869,6 +1832,43 @@ if (!session) {
 
     if (error) {
       setLoginError(error.message);
+    }
+  };
+
+  const handleSignUp = async () => {
+    setLoginError("");
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+
+    const userId = data?.user?.id;
+
+    if (!userId) {
+      setLoginError("Signup succeeded but no user ID was returned.");
+      return;
+    }
+
+    const { error: profileError } = await supabase
+      .from("players")
+      .insert([
+        {
+          user_id: userId,
+          name: signupName.trim(),
+          position: signupPosition.trim() || "N/A",
+          role: signupRole,
+        },
+      ]);
+
+    if (profileError) {
+      setLoginError(profileError.message);
+      return;
     }
   };
 
