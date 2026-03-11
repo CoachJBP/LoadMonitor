@@ -1294,7 +1294,19 @@ const playerLoadHistory = last7Days.map((date) => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
                 <YAxis stroke="#cbd5e1" fontSize={12} />
-                <Tooltip contentStyle={{ background: "#020617", border: "1px solid #334155", borderRadius: 16 }} />
+                <Tooltip
+  contentStyle={{
+    background: "#020617",
+    border: "1px solid #334155",
+    borderRadius: 16,
+  }}
+  formatter={(value, name) => {
+    if (name === "selectedLoad") return [value, "Selected Player"];
+    if (name === "squadAverageLoad") return [value, "Squad Average"];
+    if (name === "targetLoad") return [value, "Target Load"];
+    return [value, name];
+  }}
+/>
                 <Line type="monotone" dataKey="avgLoad" stroke="#ffffff" strokeWidth={3} dot={{ r: 4 }} />
                 <Line type="monotone" dataKey="avgPlannedLoad" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
