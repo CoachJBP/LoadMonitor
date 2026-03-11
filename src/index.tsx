@@ -2027,14 +2027,7 @@ if (!session) {
     </p>
   </div>
 </div>
-        <div className="mb-8 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20 backdrop-blur md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-2 text-sm uppercase tracking-[0.25em] text-sky-300">LoadMonitor</p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Bonivital Performance Tracking System</h1>
-            <p className="mt-3 max-w-3xl text-sm text-slate-300 md:text-base">
-              A working MVP to capture pre-training wellness, post-training RPE, daily readiness, rolling load, and attendance in one clean interface.
-            </p>
-          </div>
+       
 
           <div className="flex flex-wrap gap-3 items-center">
 
