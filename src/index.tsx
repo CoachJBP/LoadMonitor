@@ -1426,236 +1426,244 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
     load30: sumLoads(sessionEntries, selectedPlayer.id, 30),
   };
 
-  const playerLoadTrend = getLast7Days(todayKey()).map((date) => {
-  const session = sessionEntries.find(
-    (s) => s.playerId === selectedPlayer.id && s.date === date
-  );
-
-  return {
-    date,
-    load: session ? Number(session.load || 0) : 0,
-    rpe: session ? Number(session.rpe || 0) : 0,
-  };
-});
-
-  const playerReadinessTrend = getLast7Days(todayKey()).map((date) => {
-  const wellness = wellnessEntries.find(
-    (w) => w.playerId === selectedPlayer.id && w.date === date
-  );
-
-  return {
-    date,
-    readiness: wellness ? scoreReadiness(wellness) : null,
-  };
-});
-  
   const attendance = attendanceSummary(sessionEntries, selectedPlayer.id, 30);
 
   const latestWellness = [...wellnessEntries]
-  .filter((w) => w.playerId === selectedPlayer.id)
-  .sort((a, b) => b.date.localeCompare(a.date))[0];
+    .filter((w) => w.playerId === selectedPlayer.id)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
 
-const latestSession = [...sessionEntries]
-  .filter((s) => s.playerId === selectedPlayer.id)
-  .sort((a, b) => b.date.localeCompare(a.date))[0];
+  const latestSession = [...sessionEntries]
+    .filter((s) => s.playerId === selectedPlayer.id)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
 
-const latestReadiness = latestWellness ? scoreReadiness(latestWellness) : null;
+  const latestReadiness = latestWellness ? scoreReadiness(latestWellness) : null;
 
-let profileStatus = "Green";
-let profileStatusLabel = "Ready";
+  let profileStatus = "Green";
+  let profileStatusLabel = "Ready";
 
-if (
-  latestReadiness !== null && latestReadiness < 60 ||
-  (latestSession?.bodyCheck && latestSession.bodyCheck !== "None" && latestSession.bodyCheck !== "Minor")
-) {
-  profileStatus = "Red";
-  profileStatusLabel = "Alert";
-} else if (
-  (latestReadiness !== null && latestReadiness < 75) ||
-  (latestSession?.bodyCheck && latestSession.bodyCheck !== "None")
-) {
-  profileStatus = "Amber";
-  profileStatusLabel = "Monitor";
-}
+  if (
+    (latestReadiness !== null && latestReadiness < 60) ||
+    (latestSession?.bodyCheck &&
+      latestSession.bodyCheck !== "None" &&
+      latestSession.bodyCheck !== "Minor")
+  ) {
+    profileStatus = "Red";
+    profileStatusLabel = "Alert";
+  } else if (
+    (latestReadiness !== null && latestReadiness < 75) ||
+    (latestSession?.bodyCheck && latestSession.bodyCheck !== "None")
+  ) {
+    profileStatus = "Amber";
+    profileStatusLabel = "Monitor";
+  }
 
   const profileStatusClasses =
-  profileStatus === "Red"
-    ? "bg-red-500/20 text-red-200 border-red-400/30"
-    : profileStatus === "Amber"
-      ? "bg-amber-400/20 text-amber-200 border-amber-300/30"
-      : "bg-emerald-500/20 text-emerald-200 border-emerald-400/30";
-  
+    profileStatus === "Red"
+      ? "bg-red-500/20 text-red-200 border-red-400/30"
+      : profileStatus === "Amber"
+        ? "bg-amber-400/20 text-amber-200 border-amber-300/30"
+        : "bg-emerald-500/20 text-emerald-200 border-emerald-400/30";
+
+  const playerLoadTrend = getLast7Days(todayKey()).map((date) => {
+    const session = sessionEntries.find(
+      (s) => s.playerId === selectedPlayer.id && s.date === date
+    );
+
+    return {
+      date,
+      load: session ? Number(session.load || 0) : 0,
+      rpe: session ? Number(session.rpe || 0) : 0,
+    };
+  });
+
+  const playerReadinessTrend = getLast7Days(todayKey()).map((date) => {
+    const wellness = wellnessEntries.find(
+      (w) => w.playerId === selectedPlayer.id && w.date === date
+    );
+
+    return {
+      date,
+      readiness: wellness ? scoreReadiness(wellness) : null,
+    };
+  });
+
   return (
-  <SectionCard title="Player Profile" icon={Users} subtitle={`Performance overview for ${selectedPlayer.name}`}>
-    <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-5">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
-            Player Overview
-          </p>
-          <h2 className="mt-1 text-2xl font-bold text-white">
-            {selectedPlayer.name}
-          </h2>
-          <p className="mt-1 text-sm text-slate-400">
-            Position: {selectedPlayer.position}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <div className={cn("rounded-2xl border px-4 py-3", profileStatusClasses)}>
-            <p className="text-xs opacity-80">Current status</p>
-            <p className="text-sm font-semibold">
-              {profileStatusLabel}
+    <SectionCard
+      title="Player Profile"
+      icon={Users}
+      subtitle={`Performance overview for ${selectedPlayer.name}`}
+    >
+      <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+              Player Overview
+            </p>
+            <h2 className="mt-1 text-2xl font-bold text-white">
+              {selectedPlayer.name}
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Position: {selectedPlayer.position}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
-            <p className="text-xs text-slate-400">Latest readiness</p>
-            <p className="text-sm font-semibold text-white">
-              {latestReadiness !== null ? `${latestReadiness}%` : "--"}
-            </p>
-          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className={cn("rounded-2xl border px-4 py-3", profileStatusClasses)}>
+              <p className="text-xs opacity-80">Current status</p>
+              <p className="text-sm font-semibold">{profileStatusLabel}</p>
+            </div>
 
-          <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
-            <p className="text-xs text-slate-400">Latest body check</p>
-            <p className="text-sm font-semibold text-white">
-              {latestSession?.bodyCheck || "None"}
-            </p>
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
+              <p className="text-xs text-slate-400">Latest readiness</p>
+              <p className="text-sm font-semibold text-white">
+                {latestReadiness !== null ? `${latestReadiness}%` : "--"}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
+              <p className="text-xs text-slate-400">Latest body check</p>
+              <p className="text-sm font-semibold text-white">
+                {latestSession?.bodyCheck || "None"}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div className="grid gap-4 md:grid-cols-4">
-      <StatCard label="Load 7d" value={loads.load7} hint="Rolling window" tone="blue" />
-      <StatCard label="Load 15d" value={loads.load15} hint="Rolling window" tone="blue" />
-      <StatCard label="Load 30d" value={loads.load30} hint="Rolling window" tone="blue" />
-      <StatCard label="Attendance 30d" value={`${attendance.percent}%`} hint={`${attendance.attended}/${attendance.total} sessions`} tone="green" />
-    </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard label="Load 7d" value={loads.load7} hint="Rolling window" tone="blue" />
+        <StatCard label="Load 15d" value={loads.load15} hint="Rolling window" tone="blue" />
+        <StatCard label="Load 30d" value={loads.load30} hint="Rolling window" tone="blue" />
+        <StatCard
+          label="Attendance 30d"
+          value={`${attendance.percent}%`}
+          hint={`${attendance.attended}/${attendance.total} sessions`}
+          tone="green"
+        />
+      </div>
 
-    <div className="mt-6">
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
-  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-    <div className="mb-4">
-      <p className="text-sm font-semibold text-white">Load Trend</p>
-      <p className="text-sm text-slate-400">
-        Last 7 days internal load for {selectedPlayer.name}
-      </p>
-    </div>
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-white">Load Trend</p>
+            <p className="text-sm text-slate-400">
+              Last 7 days internal load for {selectedPlayer.name}
+            </p>
+          </div>
 
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={playerLoadTrend}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
-          <YAxis stroke="#cbd5e1" fontSize={12} />
-          <Tooltip
-            contentStyle={{
-              background: "#020617",
-              border: "1px solid #334155",
-              borderRadius: 16,
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="load"
-            stroke="#fcd34d"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={playerLoadTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+                <YAxis stroke="#cbd5e1" fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#020617",
+                    border: "1px solid #334155",
+                    borderRadius: 16,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="load"
+                  stroke="#fcd34d"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-    <div className="mb-4">
-      <p className="text-sm font-semibold text-white">Readiness Trend</p>
-      <p className="text-sm text-slate-400">
-        Last 7 days readiness score for {selectedPlayer.name}
-      </p>
-    </div>
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-white">Readiness Trend</p>
+            <p className="text-sm text-slate-400">
+              Last 7 days readiness score for {selectedPlayer.name}
+            </p>
+          </div>
 
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={playerReadinessTrend}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
-          <YAxis domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
-          <Tooltip
-            contentStyle={{
-              background: "#020617",
-              border: "1px solid #334155",
-              borderRadius: 16,
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="readiness"
-            stroke="#34d399"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            connectNulls={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-</div>
-
-    <div className="mt-6 grid gap-6 xl:grid-cols-2">
-      <div className="overflow-hidden rounded-3xl border border-white/10">
-        <table className="min-w-full divide-y divide-white/10 text-sm">
-          <thead className="bg-white/5 text-left text-slate-300">
-            <tr>
-              <th className="px-4 py-3">Wellness date</th>
-              <th className="px-4 py-3">Readiness</th>
-              <th className="px-4 py-3">Comment</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
-            {playerWellness.map((w, idx) => (
-              <tr key={`${w.date}-${idx}`}>
-                <td className="px-4 py-3">{w.date}</td>
-                <td className="px-4 py-3">{scoreReadiness(w)}%</td>
-                <td className="px-4 py-3 text-slate-300">{w.comment || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={playerReadinessTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+                <YAxis domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#020617",
+                    border: "1px solid #334155",
+                    borderRadius: 16,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="readiness"
+                  stroke="#34d399"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-white/10">
-        <table className="min-w-full divide-y divide-white/10 text-sm">
-          <thead className="bg-white/5 text-left text-slate-300">
-            <tr>
-              <th className="px-4 py-3">Session date</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Attendance</th>
-              <th className="px-4 py-3">Load</th>
-              <th className="px-4 py-3">Body check</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
-            {playerSessions.map((s, idx) => (
-              <tr key={`${s.date}-${idx}`}>
-                <td className="px-4 py-3">{s.date}</td>
-                <td className="px-4 py-3">{s.sessionType || "—"}</td>
-                <td className="px-4 py-3">{s.attendance || "—"}</td>
-                <td className="px-4 py-3">{s.load || 0}</td>
-                <td className="px-4 py-3 text-slate-300">
-                  {s.bodyCheck && s.bodyCheck !== "None"
-                    ? `${s.bodyCheck}${s.painArea ? ` • ${s.painArea}` : ""}`
-                    : "None"}
-                </td>
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        <div className="overflow-hidden rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Wellness date</th>
+                <th className="px-4 py-3">Readiness</th>
+                <th className="px-4 py-3">Comment</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {playerWellness.map((w, idx) => (
+                <tr key={`${w.date}-${idx}`}>
+                  <td className="px-4 py-3">{w.date}</td>
+                  <td className="px-4 py-3">{scoreReadiness(w)}%</td>
+                  <td className="px-4 py-3 text-slate-300">{w.comment || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Session date</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Attendance</th>
+                <th className="px-4 py-3">Load</th>
+                <th className="px-4 py-3">Body check</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {playerSessions.map((s, idx) => (
+                <tr key={`${s.date}-${idx}`}>
+                  <td className="px-4 py-3">{s.date}</td>
+                  <td className="px-4 py-3">{s.sessionType || "—"}</td>
+                  <td className="px-4 py-3">{s.attendance || "—"}</td>
+                  <td className="px-4 py-3">{s.load || 0}</td>
+                  <td className="px-4 py-3 text-slate-300">
+                    {s.bodyCheck && s.bodyCheck !== "None"
+                      ? `${s.bodyCheck}${s.painArea ? ` • ${s.painArea}` : ""}`
+                      : "None"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  </SectionCard>
-);
+    </SectionCard>
+  );
 }
 export default function PlayerLoadMonitorApp() {
   const [mode, setMode] = useState("staff");
