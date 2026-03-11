@@ -1894,114 +1894,138 @@ if (!session) {
 };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
-      <div className="bg-slate-800 p-6 rounded-2xl w-80 space-y-4">
+  <div className="min-h-screen bg-slate-900 text-white flex flex-col">
+    <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
+      <div className="mb-8 overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl shadow-black/20 backdrop-blur">
+        <div className="h-1.5 w-full bg-gradient-to-r from-blue-950 via-amber-300 to-red-500" />
 
+        <div className="flex items-center gap-4 p-6">
+          <img
+            src="/bonivital-logo.png"
+            alt="Bonivital"
+            className="h-16 w-16 object-contain"
+          />
+
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-amber-300">
+              Bonivital SC
+            </p>
+            <h1 className="text-2xl font-bold text-white">
+              Performance Monitor
+            </h1>
+            <p className="text-sm text-slate-400">
+              Internal Load · Wellness · Readiness
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-sm rounded-2xl bg-slate-800 p-6 space-y-4">
         <div className="flex gap-2">
-  <button
-    onClick={() => setAuthMode("login")}
-    className={cn(
-      "flex-1 rounded-xl p-2 font-semibold",
-      authMode === "login"
-        ? "bg-white text-black"
-        : "bg-slate-900 text-white border border-white/10"
-    )}
-  >
-    Log in
-  </button>
+          <button
+            onClick={() => setAuthMode("login")}
+            className={cn(
+              "flex-1 rounded-xl p-2 font-semibold",
+              authMode === "login"
+                ? "bg-white text-black"
+                : "bg-slate-900 text-white border border-white/10"
+            )}
+          >
+            Log in
+          </button>
 
-  <button
-    onClick={() => setAuthMode("signup")}
-    className={cn(
-      "flex-1 rounded-xl p-2 font-semibold",
-      authMode === "signup"
-        ? "bg-white text-black"
-        : "bg-slate-900 text-white border border-white/10"
-    )}
-  >
-    Sign up
-  </button>
-</div>
+          <button
+            onClick={() => setAuthMode("signup")}
+            className={cn(
+              "flex-1 rounded-xl p-2 font-semibold",
+              authMode === "signup"
+                ? "bg-white text-black"
+                : "bg-slate-900 text-white border border-white/10"
+            )}
+          >
+            Sign up
+          </button>
+        </div>
 
-{authMode === "signup" && (
-  <>
-    <input
-      type="text"
-      placeholder="Full name"
-      value={signupName}
-      onChange={(e) => setSignupName(e.target.value)}
-      className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
-    />
+        {authMode === "signup" && (
+          <>
+            <input
+              type="text"
+              placeholder="Full name"
+              value={signupName}
+              onChange={(e) => setSignupName(e.target.value)}
+              className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+            />
 
-    <input
-      type="text"
-      placeholder="Position / Role title"
-      value={signupPosition}
-      onChange={(e) => setSignupPosition(e.target.value)}
-      className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
-    />
+            <input
+              type="text"
+              placeholder="Position / Role title"
+              value={signupPosition}
+              onChange={(e) => setSignupPosition(e.target.value)}
+              className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+            />
 
-    <select
-      value={signupRole}
-      onChange={(e) => setSignupRole(e.target.value)}
-      className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
-    >
-      <option value="player">Player</option>
-      <option value="staff">Staff</option>
-    </select>
-  </>
-)}
-        
-       <input
-  type="email"
-  placeholder="Email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
-/>
+            <select
+              value={signupRole}
+              onChange={(e) => setSignupRole(e.target.value)}
+              className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+            >
+              <option value="player">Player</option>
+              <option value="staff">Staff</option>
+            </select>
+          </>
+        )}
 
-<input
-  type="password"
-  placeholder="Password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
-/>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+        />
 
-      <button
-  onClick={authMode === "login" ? handleLogin : handleSignUp}
-  disabled={authLoadingAction}
-  className={cn(
-    "w-full rounded-xl p-3 font-semibold",
-    authLoadingAction
-      ? "cursor-not-allowed bg-slate-500 text-white"
-      : "bg-white text-black"
-  )}
->
-  {authLoadingAction
-    ? authMode === "login"
-      ? "Logging in..."
-      : "Creating account..."
-    : authMode === "login"
-      ? "Login"
-      : "Create account"}
-</button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
+        />
+
+        <button
+          onClick={authMode === "login" ? handleLogin : handleSignUp}
+          disabled={authLoadingAction}
+          className={cn(
+            "w-full rounded-xl p-3 font-semibold",
+            authLoadingAction
+              ? "cursor-not-allowed bg-slate-500 text-white"
+              : "bg-white text-black"
+          )}
+        >
+          {authLoadingAction
+            ? authMode === "login"
+              ? "Logging in..."
+              : "Creating account..."
+            : authMode === "login"
+              ? "Login"
+              : "Create account"}
+        </button>
 
         {loginError && (
-  <div className="text-sm text-red-400">
-    {loginError}
-  </div>
-)}
+          <div className="text-sm text-red-400">
+            {loginError}
+          </div>
+        )}
 
-{authSuccessMessage && (
-  <div className="text-sm text-emerald-400">
-    {authSuccessMessage}
-  </div>
-)}
-
+        {authSuccessMessage && (
+          <div className="text-sm text-emerald-400">
+            {authSuccessMessage}
+          </div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
 }
 
   return (
