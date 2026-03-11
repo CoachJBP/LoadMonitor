@@ -1491,22 +1491,74 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
   const exportPlayerPdf = () => {
   const doc = new jsPDF();
 
+  const pageWidth = doc.internal.pageSize.getWidth();
   let y = 20;
 
-  doc.setFontSize(18);
-  doc.text("Bonivital Performance Monitor", 14, y);
-  y += 10;
+  // Top color bar
+  doc.setFillColor(10, 24, 60); // navy
+  doc.rect(0, 0, pageWidth, 12, "F");
 
-  doc.setFontSize(14);
-  doc.text(`Player Report: ${selectedPlayer.name}`, 14, y);
+  doc.setFillColor(245, 197, 24); // gold
+  doc.rect(0, 12, pageWidth * 0.72, 3, "F");
+
+  doc.setFillColor(200, 30, 45); // red accent
+  doc.rect(pageWidth * 0.72, 12, pageWidth * 0.28, 3, "F");
+
+  // Header
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.text("BONIVITAL SC", 14, 9);
+
+  y = 28;
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(20);
+  doc.setFont("helvetica", "bold");
+  doc.text("Performance Monitor", 14, y);
+
   y += 8;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+  doc.text("Individual Player Report", 14, y);
+
+  // Player identity block
+  y += 14;
+  doc.setDrawColor(220, 226, 235);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(14, y - 5, 182, 26, 3, 3, "FD");
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(15);
+  doc.setFont("helvetica", "bold");
+  doc.text(selectedPlayer.name, 18, y + 4);
 
   doc.setFontSize(11);
-  doc.text(`Position: ${selectedPlayer.position}`, 14, y);
-  y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(71, 85, 105);
+  doc.text(`Position: ${selectedPlayer.position}`, 18, y + 12);
+  doc.text(`Status: ${profileStatusLabel}`, 90, y + 12);
 
-  doc.text(`Current Status: ${profileStatusLabel}`, 14, y);
-  y += 7;
+  y += 32;
+
+  // Section title helper
+  const sectionTitle = (title) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(10, 24, 60);
+    doc.text(title, 14, y);
+    y += 6;
+
+    doc.setDrawColor(230, 235, 240);
+    doc.line(14, y, 196, y);
+    y += 8;
+  };
+
+  sectionTitle("Current Snapshot");
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(15, 23, 42);
 
   doc.text(
     `Latest Readiness: ${latestReadiness !== null ? `${latestReadiness}%` : "--"}`,
@@ -1518,36 +1570,29 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
   doc.text(`Latest Body Check: ${latestSession?.bodyCheck || "None"}`, 14, y);
   y += 10;
 
-  doc.setFontSize(13);
-  doc.text("Load Summary", 14, y);
-  y += 8;
+  sectionTitle("Load Summary");
 
-  doc.setFontSize(11);
   doc.text(`Load 7d: ${loads.load7}`, 14, y);
-  y += 6;
+  y += 7;
   doc.text(`Load 15d: ${loads.load15}`, 14, y);
-  y += 6;
+  y += 7;
   doc.text(`Load 30d: ${loads.load30}`, 14, y);
-  y += 6;
+  y += 7;
   doc.text(`Attendance 30d: ${attendance.percent}%`, 14, y);
   y += 10;
 
-  doc.setFontSize(13);
-  doc.text("Latest Wellness Notes", 14, y);
-  y += 8;
+  sectionTitle("Latest Wellness Note");
 
-  doc.setFontSize(11);
   const latestComment = latestWellness?.comment?.trim()
     ? latestWellness.comment
     : "No recent wellness comment.";
 
+  doc.setFont("helvetica", "normal");
   const wrappedComment = doc.splitTextToSize(latestComment, 180);
   doc.text(wrappedComment, 14, y);
-  y += wrappedComment.length * 6 + 6;
+  y += wrappedComment.length * 6 + 8;
 
-  doc.setFontSize(13);
-  doc.text("Recent Session History", 14, y);
-  y += 8;
+  sectionTitle("Recent Session History");
 
   doc.setFontSize(10);
 
@@ -1555,8 +1600,18 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
     const line = `${s.date} | ${s.sessionType || "—"} | ${s.attendance || "—"} | Load: ${s.load || 0} | Body check: ${s.bodyCheck || "None"}`;
     const wrapped = doc.splitTextToSize(line, 180);
     doc.text(wrapped, 14, y);
-    y += wrapped.length * 5 + 3;
+    y += wrapped.length * 5 + 4;
   });
+
+  // Footer
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setDrawColor(230, 235, 240);
+  doc.line(14, pageHeight - 18, 196, pageHeight - 18);
+
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Bonivital Performance Monitor", 14, pageHeight - 10);
+  doc.text(new Date().toLocaleDateString(), 170, pageHeight - 10);
 
   doc.save(`${selectedPlayer.name.replace(/\s+/g, "_")}_report.pdf`);
 };
