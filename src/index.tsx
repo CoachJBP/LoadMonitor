@@ -1488,6 +1488,79 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
     };
   });
 
+  const exportPlayerPdf = () => {
+  const doc = new jsPDF();
+
+  let y = 20;
+
+  doc.setFontSize(18);
+  doc.text("Bonivital Performance Monitor", 14, y);
+  y += 10;
+
+  doc.setFontSize(14);
+  doc.text(`Player Report: ${selectedPlayer.name}`, 14, y);
+  y += 8;
+
+  doc.setFontSize(11);
+  doc.text(`Position: ${selectedPlayer.position}`, 14, y);
+  y += 7;
+
+  doc.text(`Current Status: ${profileStatusLabel}`, 14, y);
+  y += 7;
+
+  doc.text(
+    `Latest Readiness: ${latestReadiness !== null ? `${latestReadiness}%` : "--"}`,
+    14,
+    y
+  );
+  y += 7;
+
+  doc.text(`Latest Body Check: ${latestSession?.bodyCheck || "None"}`, 14, y);
+  y += 10;
+
+  doc.setFontSize(13);
+  doc.text("Load Summary", 14, y);
+  y += 8;
+
+  doc.setFontSize(11);
+  doc.text(`Load 7d: ${loads.load7}`, 14, y);
+  y += 6;
+  doc.text(`Load 15d: ${loads.load15}`, 14, y);
+  y += 6;
+  doc.text(`Load 30d: ${loads.load30}`, 14, y);
+  y += 6;
+  doc.text(`Attendance 30d: ${attendance.percent}%`, 14, y);
+  y += 10;
+
+  doc.setFontSize(13);
+  doc.text("Latest Wellness Notes", 14, y);
+  y += 8;
+
+  doc.setFontSize(11);
+  const latestComment = latestWellness?.comment?.trim()
+    ? latestWellness.comment
+    : "No recent wellness comment.";
+
+  const wrappedComment = doc.splitTextToSize(latestComment, 180);
+  doc.text(wrappedComment, 14, y);
+  y += wrappedComment.length * 6 + 6;
+
+  doc.setFontSize(13);
+  doc.text("Recent Session History", 14, y);
+  y += 8;
+
+  doc.setFontSize(10);
+
+  playerSessions.slice(0, 5).forEach((s) => {
+    const line = `${s.date} | ${s.sessionType || "—"} | ${s.attendance || "—"} | Load: ${s.load || 0} | Body check: ${s.bodyCheck || "None"}`;
+    const wrapped = doc.splitTextToSize(line, 180);
+    doc.text(wrapped, 14, y);
+    y += wrapped.length * 5 + 3;
+  });
+
+  doc.save(`${selectedPlayer.name.replace(/\s+/g, "_")}_report.pdf`);
+};
+  
   return (
     <SectionCard
       title="Player Profile"
@@ -1508,7 +1581,13 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+  onClick={exportPlayerPdf}
+  className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-200 hover:bg-amber-400/20"
+>
+  Export PDF Report
+</button>
             <div className={cn("rounded-2xl border px-4 py-3", profileStatusClasses)}>
               <p className="text-xs opacity-80">Current status</p>
               <p className="text-sm font-semibold">{profileStatusLabel}</p>
