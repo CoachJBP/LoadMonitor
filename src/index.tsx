@@ -151,7 +151,7 @@ function StatCard({ label, value, hint, tone = "default", icon: Icon }) {
     green: "from-emerald-900/50 to-slate-900 border-emerald-400/20",
     amber: "from-amber-900/40 to-slate-900 border-amber-400/20",
     red: "from-red-900/40 to-slate-900 border-red-400/20",
-    blue: "from-sky-900/40 to-slate-900 border-sky-400/20",
+    blue: "from-blue-950/70 to-slate-900 border-amber-300/20",
   };
   return (
     <div className={cn("rounded-3xl border bg-gradient-to-br p-4", toneMap[tone])}>
@@ -385,7 +385,7 @@ if (data && data.length > 0) {
         title="Post-Training RPE"
         icon={ClipboardList}
         subtitle={isBlocked ? `${selectedPlayer.name} is marked as ${rpe.attendance} for today` : `Session type: ${rpe.sessionType} • Duration: ${rpe.duration || 0} min`}
-        right={<div className="rounded-full bg-sky-400 px-3 py-1 text-sm font-semibold text-slate-950">Load {Number(rpe.duration || 0) * Number(rpe.rpe || 0)}</div>}
+        right={<div className="rounded-full bg-amber-300 px-3 py-1 text-sm font-semibold text-slate-950">Load {Number(rpe.duration || 0) * Number(rpe.rpe || 0)}</div>}
       >
         {isBlocked ? (
           <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4 text-sm text-slate-300">
@@ -459,7 +459,7 @@ if (data && data.length > 0) {
     "rounded-2xl px-4 py-4 font-semibold transition",
     rpeSubmitted
       ? "cursor-not-allowed bg-slate-700 text-slate-300"
-      : "bg-sky-400 text-slate-950 hover:scale-[1.01]"
+      : "bg-amber-300 text-slate-950 hover:scale-[1.01]"
   )}
 >
   {rpeSubmitted ? "RPE already submitted" : "Save RPE entry"}
@@ -1015,7 +1015,7 @@ return (
 <div className="mt-3">
   <button
     onClick={saveManualRpe}
-    className="rounded-2xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 hover:scale-[1.01]"
+    className="rounded-2xl bg-amber-300 px-4 py-3 font-semibold text-slate-950 hover:scale-[1.01]"
   >
     Save RPE entry
   </button>
@@ -2049,7 +2049,7 @@ if (!session) {
           className={cn(
             "rounded-2xl px-4 py-3 text-sm font-semibold transition",
             mode === "player"
-              ? "bg-sky-400 text-slate-950"
+  ? "bg-amber-300 text-slate-950"
               : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
           )}
         >
@@ -2058,7 +2058,7 @@ if (!session) {
 
         <button
           onClick={handleExportWellness}
-          className="rounded-2xl px-4 py-4 text-sm font-semibold border border-emerald-400/30 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/40"
+          className="rounded-2xl px-4 py-4 text-sm font-semibold border border-amber-300/30 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
         >
           Export Wellness CSV
         </button>
