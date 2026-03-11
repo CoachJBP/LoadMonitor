@@ -1440,6 +1440,40 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
   
   const attendance = attendanceSummary(sessionEntries, selectedPlayer.id, 30);
 
+  const latestWellness = [...wellnessEntries]
+  .filter((w) => w.playerId === selectedPlayer.id)
+  .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+const latestSession = [...sessionEntries]
+  .filter((s) => s.playerId === selectedPlayer.id)
+  .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+const latestReadiness = latestWellness ? scoreReadiness(latestWellness) : null;
+
+let profileStatus = "Green";
+let profileStatusLabel = "Ready";
+
+if (
+  latestReadiness !== null && latestReadiness < 60 ||
+  (latestSession?.bodyCheck && latestSession.bodyCheck !== "None" && latestSession.bodyCheck !== "Minor")
+) {
+  profileStatus = "Red";
+  profileStatusLabel = "Alert";
+} else if (
+  (latestReadiness !== null && latestReadiness < 75) ||
+  (latestSession?.bodyCheck && latestSession.bodyCheck !== "None")
+) {
+  profileStatus = "Amber";
+  profileStatusLabel = "Monitor";
+}
+
+  const profileStatusClasses =
+  profileStatus === "Red"
+    ? "bg-red-500/20 text-red-200 border-red-400/30"
+    : profileStatus === "Amber"
+      ? "bg-amber-400/20 text-amber-200 border-amber-300/30"
+      : "bg-emerald-500/20 text-emerald-200 border-emerald-400/30";
+  
   return (
   <SectionCard title="Player Profile" icon={Users} subtitle={`Performance overview for ${selectedPlayer.name}`}>
     <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-5">
@@ -1456,22 +1490,28 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
       </p>
     </div>
 
-    <div className="flex flex-wrap gap-3">
-      <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
-        <p className="text-xs text-slate-400">Current status</p>
-        <p className="text-sm font-semibold text-white">
-          Monitoring active
-        </p>
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
-        <p className="text-xs text-slate-400">Profile type</p>
-        <p className="text-sm font-semibold text-white">
-          Performance tracking
-        </p>
-      </div>
-    </div>
+   <div className="flex flex-wrap gap-3">
+  <div className={cn("rounded-2xl border px-4 py-3", profileStatusClasses)}>
+    <p className="text-xs opacity-80">Current status</p>
+    <p className="text-sm font-semibold">
+      {profileStatusLabel}
+    </p>
   </div>
+
+  <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
+    <p className="text-xs text-slate-400">Latest readiness</p>
+    <p className="text-sm font-semibold text-white">
+      {latestReadiness !== null ? `${latestReadiness}%` : "--"}
+    </p>
+  </div>
+
+  <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
+    <p className="text-xs text-slate-400">Latest body check</p>
+    <p className="text-sm font-semibold text-white">
+      {latestSession?.bodyCheck || "None"}
+    </p>
+  </div>
+</div>
 </div>
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard label="Load 7d" value={loads.load7} hint="Rolling window" tone="blue" />
