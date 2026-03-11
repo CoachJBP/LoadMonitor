@@ -129,13 +129,15 @@ function useLocalState(key, initialValue) {
 
 function SectionCard({ title, icon: Icon, subtitle, children, right }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/20 backdrop-blur">
+    <div className="rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))] p-5 shadow-2xl shadow-black/30 backdrop-blur">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-2 text-white">
-            <Icon className="h-5 w-5" />
-            <h3 className="text-lg font-semibold">{title}</h3>
-          </div>
+  <div className="rounded-xl border border-white/10 bg-white/5 p-1.5">
+    <Icon className="h-4 w-4 text-amber-300" />
+  </div>
+  <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
+</div>
           {subtitle && <p className="text-sm text-slate-300">{subtitle}</p>}
         </div>
         {right}
@@ -147,21 +149,25 @@ function SectionCard({ title, icon: Icon, subtitle, children, right }) {
 
 function StatCard({ label, value, hint, tone = "default", icon: Icon }) {
   const toneMap = {
-    default: "from-slate-800 to-slate-900 border-white/10",
-    green: "from-emerald-900/50 to-slate-900 border-emerald-400/20",
-    amber: "from-amber-900/40 to-slate-900 border-amber-400/20",
-    red: "from-red-900/40 to-slate-900 border-red-400/20",
-    blue: "from-blue-950/70 to-slate-900 border-amber-300/20",
-  };
+  default: "from-slate-900 to-slate-950 border-white/10",
+  green: "from-emerald-950/80 to-slate-950 border-emerald-400/20",
+  amber: "from-amber-950/70 to-slate-950 border-amber-300/25",
+  red: "from-red-950/70 to-slate-950 border-red-400/25",
+  blue: "from-blue-950/80 to-slate-950 border-amber-300/20",
+};
   return (
-    <div className={cn("rounded-3xl border bg-gradient-to-br p-4", toneMap[tone])}>
+    <div className={cn("rounded-3xl border bg-gradient-to-br p-4 shadow-xl shadow-black/20", toneMap[tone])}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-slate-300">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-white">{value}</p>
+          <p className="mt-2 text-3xl font-bold tracking-tight text-white">{value}</p>
           {hint && <p className="mt-2 text-xs text-slate-400">{hint}</p>}
         </div>
-        {Icon && <Icon className="h-5 w-5 text-slate-300" />}
+        {Icon && (
+  <div className="rounded-xl border border-white/10 bg-white/5 p-2">
+    <Icon className="h-4 w-4 text-slate-200" />
+  </div>
+)}
       </div>
     </div>
   );
