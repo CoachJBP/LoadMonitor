@@ -1084,102 +1084,9 @@ function StaffDashboard({
   const last4Days = last7Days.slice(-4);
 
   const microcycleData = last7Days.map((date) => {
-  const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
-  const daySessions = sessionEntries.filter((s) => s.date === date);
-
-const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
-
-const totalLoadSum = submittedSessions.reduce(
-  (sum, s) => sum + Number(s.load || 0),
-  0
-);
-
-const totalLoad = submittedSessions.length
-  ? Math.round(totalLoadSum / submittedSessions.length)
-  : 0;
-
-const plannedSum = daySessions.reduce(
-  (sum, s) => sum + Number(s.plannedLoad || 0),
-  0
-);
-
-const plannedLoad = daySessions.length
-  ? Math.round(plannedSum / daySessions.length)
-  : 0;
-
-const diff = totalLoad - plannedLoad;
-    
-  return {
-    date,
-    wellnessCount,
-    totalLoad,
-    plannedLoad,
-    diff,
-  };
-});
-  const todayWellness = players.map((p) => {
-    const entry = wellnessEntries.find((w) => w.playerId === p.id && w.date === today);
-    const todaySession = sessionEntries.find((s) => s.playerId === p.id && s.date === today);
-    const load7 = sumLoads(sessionEntries, p.id, 7);
-    const load15 = sumLoads(sessionEntries, p.id, 15);
-    const load30 = sumLoads(sessionEntries, p.id, 30);
-    const attendance30 = attendanceSummary(sessionEntries, p.id, 30);
-    const flags = [];
-    if (!entry) flags.push("Missing form");
-    if (entry?.sleep === 1) flags.push("Poor sleep");
-    if (entry?.fatigue >= 4) flags.push("High fatigue");
-    if (entry?.soreness >= 4) flags.push("High soreness");
-    if (entry?.stress >= 4) flags.push("High stress");
-    if ((entry?.comment || "").trim()) flags.push("Pain note");
-    if (todaySession?.bodyCheck && todaySession.bodyCheck !== "None") flags.push(`Body check: ${todaySession.bodyCheck}`);
-
-    return {
-  ...p,
-  readiness: scoreReadiness(entry),
-  comment: entry?.comment || "",
-  sleep: entry?.sleep ?? null,
-  fatigue: entry?.fatigue ?? null,
-  soreness: entry?.soreness ?? null,
-  stress: entry?.stress ?? null,
-  mood: entry?.mood ?? null,
-  freshness: entry?.freshness ?? null,
-  load7,
-  load15,
-  load30,
-  attendance30,
-  todaySession,
-  flags,
-};
-  });
-
-  const atRisk = todayWellness.filter((p) => p.readiness !== null && p.readiness < 60);
-  const missingForms = todayWellness.filter((p) => p.readiness === null).length;
-  const painAlerts = sessionEntries.filter((s) => s.date === today && s.bodyCheck && s.bodyCheck !== "None").length;
-  const avgReadiness = todayWellness.filter((p) => p.readiness !== null).reduce((acc, p, _, arr) => acc + p.readiness / arr.length, 0);
-  const todayLoads = sessionEntries.filter((s) => s.date === today);
-  const avgTodayLoad = todayLoads.length ? Math.round(todayLoads.reduce((a, b) => a + b.load, 0) / todayLoads.length) : 0;
-  const completedWellness = todayWellness.filter((p) => p.readiness !== null).length;
-
-  const teamLoadCards = LOAD_WINDOWS.map((window) => {
-  const values = todayWellness
-    .map((p) =>
-      window.days === 7 ? p.load7 : window.days === 15 ? p.load15 : p.load30
-    )
-    .filter((value) => value > 0);
-
-  const averageLoad = values.length
-    ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
-    : 0;
-
-  return {
-    label: window.label,
-    value: averageLoad,
-  };
-});
-
-const loadByDay = useMemo(() => {
-  return last4Days.map((date) => {
+    const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
     const daySessions = sessionEntries.filter((s) => s.date === date);
+
     const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
 
     const totalLoadSum = submittedSessions.reduce(
@@ -1187,161 +1094,316 @@ const loadByDay = useMemo(() => {
       0
     );
 
-    const plannedLoadSum = submittedSessions.reduce(
+    const totalLoad = submittedSessions.length
+      ? Math.round(totalLoadSum / submittedSessions.length)
+      : 0;
+
+    const plannedSum = daySessions.reduce(
       (sum, s) => sum + Number(s.plannedLoad || 0),
       0
     );
 
-    return {
-      date,
-      avgLoad: submittedSessions.length
-        ? Math.round(totalLoadSum / submittedSessions.length)
-        : 0,
-      avgPlannedLoad: submittedSessions.length
-        ? Math.round(plannedLoadSum / submittedSessions.length)
-        : 0,
-    };
-  });
-}, [sessionEntries, last4Days]);
-  
-const playerLoadHistory = last7Days.map((date) => {
-  const daySessions = sessionEntries.filter((s) => s.date === date);
-
-  const selectedPlayerEntry = daySessions.find(
-    (s) => s.playerId === historyPlayerId
-  );
-
-  const otherPlayers = daySessions.filter(
-    (s) => s.playerId !== historyPlayerId && Number(s.rpe || 0) > 0
-  );
-
-  const otherPlayersAverage = otherPlayers.length
-    ? Math.round(
-        otherPlayers.reduce((sum, s) => sum + Number(s.load || 0), 0) /
-          otherPlayers.length
-      )
-    : 0;
-
-  const targetLoad =
-    selectedPlayerEntry && Number(selectedPlayerEntry.plannedLoad || 0) > 0
-      ? Number(selectedPlayerEntry.plannedLoad || 0)
+    const plannedLoad = daySessions.length
+      ? Math.round(plannedSum / daySessions.length)
       : 0;
 
-  return {
-    date,
-    selectedLoad: selectedPlayerEntry ? Number(selectedPlayerEntry.load || 0) : 0,
-    squadAverageLoad: otherPlayersAverage,
-    targetLoad,
-  };
-});
-  const teamReadinessTrend = last7Days.map((date) => {
-  const dayWellness = wellnessEntries.filter((w) => w.date === date);
+    const diff = totalLoad - plannedLoad;
 
-  const readinessValues = dayWellness
-    .map((w) => scoreReadiness(w))
-    .filter((value) => value !== null);
+    return {
+      date,
+      wellnessCount,
+      totalLoad,
+      plannedLoad,
+      diff,
+    };
+  });
 
-  const averageReadiness = readinessValues.length
-    ? Math.round(
-        readinessValues.reduce((sum, value) => sum + value, 0) /
-          readinessValues.length
+  const todayWellness = players.map((p) => {
+    const entry = wellnessEntries.find((w) => w.playerId === p.id && w.date === today);
+    const todaySession = sessionEntries.find((s) => s.playerId === p.id && s.date === today);
+    const load7 = sumLoads(sessionEntries, p.id, 7);
+    const load15 = sumLoads(sessionEntries, p.id, 15);
+    const load30 = sumLoads(sessionEntries, p.id, 30);
+    const attendance30 = attendanceSummary(sessionEntries, p.id, 30);
+
+    const flags = [];
+    if (!entry) flags.push("Missing form");
+    if (entry?.sleep === 1) flags.push("Poor sleep");
+    if (entry?.fatigue >= 4) flags.push("High fatigue");
+    if (entry?.soreness >= 4) flags.push("High soreness");
+    if (entry?.stress >= 4) flags.push("High stress");
+    if ((entry?.comment || "").trim()) flags.push("Pain note");
+    if (todaySession?.bodyCheck && todaySession.bodyCheck !== "None") {
+      flags.push(`Body check: ${todaySession.bodyCheck}`);
+    }
+
+    return {
+      ...p,
+      readiness: scoreReadiness(entry),
+      comment: entry?.comment || "",
+      sleep: entry?.sleep ?? null,
+      fatigue: entry?.fatigue ?? null,
+      soreness: entry?.soreness ?? null,
+      stress: entry?.stress ?? null,
+      mood: entry?.mood ?? null,
+      freshness: entry?.freshness ?? null,
+      load7,
+      load15,
+      load30,
+      attendance30,
+      todaySession,
+      flags,
+    };
+  });
+
+  const atRisk = todayWellness.filter((p) => p.readiness !== null && p.readiness < 60);
+  const missingForms = todayWellness.filter((p) => p.readiness === null).length;
+  const painAlerts = sessionEntries.filter(
+    (s) => s.date === today && s.bodyCheck && s.bodyCheck !== "None"
+  ).length;
+
+  const avgReadiness = todayWellness
+    .filter((p) => p.readiness !== null)
+    .reduce((acc, p, _, arr) => acc + p.readiness / arr.length, 0);
+
+  const todayLoads = sessionEntries.filter((s) => s.date === today);
+  const avgTodayLoad = todayLoads.length
+    ? Math.round(todayLoads.reduce((a, b) => a + b.load, 0) / todayLoads.length)
+    : 0;
+
+  const completedWellness = todayWellness.filter((p) => p.readiness !== null).length;
+
+  const teamLoadCards = LOAD_WINDOWS.map((window) => {
+    const values = todayWellness
+      .map((p) =>
+        window.days === 7 ? p.load7 : window.days === 15 ? p.load15 : p.load30
       )
-    : null;
+      .filter((value) => value > 0);
 
-  return {
-    date,
-    averageReadiness,
-  };
-});
+    const averageLoad = values.length
+      ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+      : 0;
+
+    return {
+      label: window.label,
+      value: averageLoad,
+    };
+  });
+
+  const loadByDay = useMemo(() => {
+    return last4Days.map((date) => {
+      const daySessions = sessionEntries.filter((s) => s.date === date);
+      const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
+
+      const totalLoadSum = submittedSessions.reduce(
+        (sum, s) => sum + Number(s.load || 0),
+        0
+      );
+
+      const plannedLoadSum = submittedSessions.reduce(
+        (sum, s) => sum + Number(s.plannedLoad || 0),
+        0
+      );
+
+      return {
+        date,
+        avgLoad: submittedSessions.length
+          ? Math.round(totalLoadSum / submittedSessions.length)
+          : 0,
+        avgPlannedLoad: submittedSessions.length
+          ? Math.round(plannedLoadSum / submittedSessions.length)
+          : 0,
+      };
+    });
+  }, [sessionEntries, last4Days]);
+
+  const playerLoadHistory = last7Days.map((date) => {
+    const daySessions = sessionEntries.filter((s) => s.date === date);
+
+    const selectedPlayerEntry = daySessions.find(
+      (s) => s.playerId === historyPlayerId
+    );
+
+    const otherPlayers = daySessions.filter(
+      (s) => s.playerId !== historyPlayerId && Number(s.rpe || 0) > 0
+    );
+
+    const otherPlayersAverage = otherPlayers.length
+      ? Math.round(
+          otherPlayers.reduce((sum, s) => sum + Number(s.load || 0), 0) /
+            otherPlayers.length
+        )
+      : 0;
+
+    const targetLoad =
+      selectedPlayerEntry && Number(selectedPlayerEntry.plannedLoad || 0) > 0
+        ? Number(selectedPlayerEntry.plannedLoad || 0)
+        : 0;
+
+    return {
+      date,
+      selectedLoad: selectedPlayerEntry
+        ? Number(selectedPlayerEntry.load || 0)
+        : 0,
+      squadAverageLoad: otherPlayersAverage,
+      targetLoad,
+    };
+  });
+
+  const teamReadinessTrend = last7Days.map((date) => {
+    const dayWellness = wellnessEntries.filter((w) => w.date === date);
+
+    const readinessValues = dayWellness
+      .map((w) => scoreReadiness(w))
+      .filter((value) => value !== null);
+
+    const averageReadiness = readinessValues.length
+      ? Math.round(
+          readinessValues.reduce((sum, value) => sum + value, 0) /
+            readinessValues.length
+        )
+      : null;
+
+    return {
+      date,
+      averageReadiness,
+    };
+  });
 
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center gap-3">
-  <span className="text-sm text-slate-300">Date</span>
-  <input
-    type="date"
-    value={selectedDate}
-    onChange={(e) => setSelectedDate(e.target.value)}
-    className="rounded-2xl border border-white/20 bg-white px-3 py-2 text-black cursor-pointer"
-  />
-  <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200">
-    Viewing: {selectedDate}
-  </div>
-</div>
+        <span className="text-sm text-slate-300">Date</span>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="rounded-2xl border border-white/20 bg-white px-3 py-2 text-black cursor-pointer"
+        />
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200">
+          Viewing: {selectedDate}
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        <StatCard label="Wellness completed" value={`${completedWellness}/${players.length}`} hint="Selected date" icon={Users} tone="blue" />
-        <StatCard label="Average readiness" value={Number.isFinite(avgReadiness) ? `${Math.round(avgReadiness)}%` : "--"} hint="Squad average" icon={HeartPulse} tone="green" />
-        <StatCard label="Players at risk" value={atRisk.length} hint="Readiness under 60%" icon={AlertTriangle} tone={atRisk.length ? "red" : "green"} />
-        <StatCard label="Average session load" value={avgTodayLoad || "--"} hint="Selected date" icon={Activity} tone="amber" />
-        <StatCard label="Missing wellness forms" value={missingForms} hint="Players still to complete" icon={ClipboardList} tone={missingForms ? "amber" : "green"} />
-        <StatCard label="Body check alerts" value={painAlerts} hint="Minor, moderate, or high" icon={AlertTriangle} tone={painAlerts ? "red" : "green"} />
+        <StatCard
+          label="Wellness completed"
+          value={`${completedWellness}/${players.length}`}
+          hint="Selected date"
+          icon={Users}
+          tone="blue"
+        />
+        <StatCard
+          label="Average readiness"
+          value={Number.isFinite(avgReadiness) ? `${Math.round(avgReadiness)}%` : "--"}
+          hint="Squad average"
+          icon={HeartPulse}
+          tone="green"
+        />
+        <StatCard
+          label="Players at risk"
+          value={atRisk.length}
+          hint="Readiness under 60%"
+          icon={AlertTriangle}
+          tone={atRisk.length ? "red" : "green"}
+        />
+        <StatCard
+          label="Average session load"
+          value={avgTodayLoad || "--"}
+          hint="Selected date"
+          icon={Activity}
+          tone="amber"
+        />
+        <StatCard
+          label="Missing wellness forms"
+          value={missingForms}
+          hint="Players still to complete"
+          icon={ClipboardList}
+          tone={missingForms ? "amber" : "green"}
+        />
+        <StatCard
+          label="Body check alerts"
+          value={painAlerts}
+          hint="Minor, moderate, or high"
+          icon={AlertTriangle}
+          tone={painAlerts ? "red" : "green"}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         {teamLoadCards.map((card) => (
-          <StatCard key={card.label} label={`Team load ${card.label}`} value={card.value} hint="Rolling load window" icon={BarChart3} tone="blue" />
+          <StatCard
+            key={card.label}
+            label={`Team load ${card.label}`}
+            value={card.value}
+            hint="Rolling load window"
+            icon={BarChart3}
+            tone="blue"
+          />
         ))}
       </div>
+
       <SectionCard
-  title="Microcycle View"
-  icon={BarChart3}
-  subtitle="7-day overview up to selected date"
->
-  <div className="overflow-x-auto rounded-3xl border border-white/10">
-    <table className="min-w-full divide-y divide-white/10 text-sm">
-      <thead className="bg-white/5 text-left text-slate-300">
-        <tr>
-  <th className="px-4 py-3">Date</th>
-  <th className="px-4 py-3">Wellness Forms</th>
-  <th className="px-4 py-3">Planned Load</th>
-  <th className="px-4 py-3">Actual Load</th>
-  <th className="px-4 py-3">Diff</th>
-</tr>
-      </thead>
-      <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
-        {microcycleData.map((day) => (
-         <tr key={day.date}>
-  <td className="px-4 py-3">{day.date}</td>
-  <td className="px-4 py-3">{day.wellnessCount}</td>
-  <td className="px-4 py-3 text-red-300">{day.plannedLoad}</td>
-  <td className="px-4 py-3">{day.totalLoad}</td>
-  <td className="px-4 py-3">
-    <span
-      className={
-        day.diff > 0
-          ? "text-red-400"
-          : day.diff < 0
-          ? "text-emerald-400"
-          : ""
-      }
-    >
-      {day.diff}
-    </span>
-  </td>
-</tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</SectionCard>
+        title="Microcycle View"
+        icon={BarChart3}
+        subtitle="7-day overview up to selected date"
+      >
+        <div className="overflow-x-auto rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Wellness Forms</th>
+                <th className="px-4 py-3">Planned Load</th>
+                <th className="px-4 py-3">Actual Load</th>
+                <th className="px-4 py-3">Diff</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {microcycleData.map((day) => (
+                <tr key={day.date}>
+                  <td className="px-4 py-3">{day.date}</td>
+                  <td className="px-4 py-3">{day.wellnessCount}</td>
+                  <td className="px-4 py-3 text-red-300">{day.plannedLoad}</td>
+                  <td className="px-4 py-3">{day.totalLoad}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        day.diff > 0
+                          ? "text-red-400"
+                          : day.diff < 0
+                            ? "text-emerald-400"
+                            : ""
+                      }
+                    >
+                      {day.diff}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <SectionCard
-  title="Planned vs Actual Load Trend"
-  icon={BarChart3}
-  subtitle="Average planned load vs actual internal load by day"
->
+          title="Planned vs Actual Load Trend"
+          icon={BarChart3}
+          subtitle="Average planned load vs actual internal load by day"
+        >
           <div className="mb-3 flex gap-4 text-sm text-slate-300">
-  <div className="flex items-center gap-2">
-    <span className="inline-block h-3 w-3 rounded-full bg-white" />
-    <span>Actual Load</span>
-  </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-3 w-3 rounded-full bg-white" />
+              <span>Actual Load</span>
+            </div>
 
-  <div className="flex items-center gap-2">
-    <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
-    <span>Planned Load</span>
-  </div>
-</div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+              <span>Planned Load</span>
+            </div>
+          </div>
+
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={loadByDay}>
@@ -1349,123 +1411,141 @@ const playerLoadHistory = last7Days.map((date) => {
                 <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
                 <YAxis stroke="#cbd5e1" fontSize={12} />
                 <Tooltip
-  contentStyle={{
-    background: "#020617",
-    border: "1px solid #334155",
-    borderRadius: 16,
-  }}
-  formatter={(value, name) => {
-    if (name === "selectedLoad") return [value, "Selected Player"];
-    if (name === "squadAverageLoad") return [value, "Squad Average"];
-    if (name === "targetLoad") return [value, "Target Load"];
-    return [value, name];
-  }}
-/>
-                <Line type="monotone" dataKey="avgLoad" stroke="#ffffff" strokeWidth={3} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="avgPlannedLoad" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
+                  contentStyle={{
+                    background: "#020617",
+                    border: "1px solid #334155",
+                    borderRadius: 16,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="avgLoad"
+                  stroke="#ffffff"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="avgPlannedLoad"
+                  stroke="#ef4444"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </SectionCard>
 
         <SectionCard
-  title="Team Average Readiness Trend"
-  icon={Moon}
-  subtitle="7-day window from selected date"
->
-  <div className="h-72 w-full">
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={teamReadinessTrend}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-        <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
-        <YAxis domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
-        <Tooltip
-          contentStyle={{
-            background: "#020617",
-            border: "1px solid #334155",
-            borderRadius: 16,
-          }}
-          formatter={(value, name) => {
-            if (name === "averageReadiness") return [value, "Team Average Readiness"];
-            return [value, name];
-          }}
-        />
-        <Line
-          type="monotone"
-          dataKey="averageReadiness"
-          stroke="#34d399"
-          strokeWidth={3}
-          dot={{ r: 4 }}
-          connectNulls={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  </div>
-</SectionCard>
+          title="Team Average Readiness Trend"
+          icon={Moon}
+          subtitle="7-day window from selected date"
+        >
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={teamReadinessTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+                <YAxis domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#020617",
+                    border: "1px solid #334155",
+                    borderRadius: 16,
+                  }}
+                  formatter={(value, name) => {
+                    if (name === "averageReadiness") {
+                      return [value, "Team Average Readiness"];
+                    }
+                    return [value, name];
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="averageReadiness"
+                  stroke="#34d399"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+      </div>
 
       <SectionCard
-  title="Selected Player Load History"
-  icon={BarChart3}
-  subtitle="7-day window from selected date"
->
+        title="Selected Player Load History"
+        icon={BarChart3}
+        subtitle="7-day window from selected date"
+      >
         <div className="mb-3 flex gap-4 text-sm text-slate-300">
-  <div className="flex items-center gap-2">
-    <span className="inline-block h-3 w-3 rounded-full bg-sky-400" />
-    <span>Selected Player</span>
-  </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-3 w-3 rounded-full bg-sky-400" />
+            <span>Selected Player</span>
+          </div>
 
-  <div className="flex items-center gap-2">
-    <span className="inline-block h-3 w-3 rounded-full bg-white" />
-    <span>Other Players Average</span>
-  </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-3 w-3 rounded-full bg-white" />
+            <span>Other Players Average</span>
+          </div>
 
-  <div className="flex items-center gap-2">
-    <span className="inline-block h-3 w-3 rounded-full bg-amber-300" />
-    <span>Target Load</span>
-  </div>
-</div>
-        
-  <div className="h-72 w-full">
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={playerLoadHistory}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-        <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
-        <YAxis stroke="#cbd5e1" fontSize={12} />
-        <Tooltip
-          contentStyle={{
-            background: "#020617",
-            border: "1px solid #334155",
-            borderRadius: 16,
-          }}
-        />
-        <Line
-  type="monotone"
-  dataKey="selectedLoad"
-  stroke="#38bdf8"
-  strokeWidth={3}
-  dot={{ r: 4 }}
-/>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-3 w-3 rounded-full bg-amber-300" />
+            <span>Target Load</span>
+          </div>
+        </div>
 
-<Line
-  type="monotone"
-  dataKey="squadAverageLoad"
-  stroke="#ffffff"
-  strokeWidth={2}
-  dot={{ r: 3 }}
-/>
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={playerLoadHistory}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+              <YAxis stroke="#cbd5e1" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  background: "#020617",
+                  border: "1px solid #334155",
+                  borderRadius: 16,
+                }}
+                formatter={(value, name) => {
+                  if (name === "selectedLoad") return [value, "Selected Player"];
+                  if (name === "squadAverageLoad") return [value, "Squad Average"];
+                  if (name === "targetLoad") return [value, "Target Load"];
+                  return [value, name];
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="selectedLoad"
+                stroke="#38bdf8"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="squadAverageLoad"
+                stroke="#ffffff"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="targetLoad"
+                stroke="#fcd34d"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </SectionCard>
 
-<Line
-  type="monotone"
-  dataKey="targetLoad"
-  stroke="#fcd34d"
-  strokeWidth={2}
-  dot={{ r: 3 }}
-/>
-      </LineChart>
-    </ResponsiveContainer>
-  </div>
-</SectionCard>
-      <SectionCard title="Daily player status" icon={Timer} subtitle="Simple traffic-light view for staff discussion before training">
+      <SectionCard
+        title="Daily player status"
+        icon={Timer}
+        subtitle="Simple traffic-light view for staff discussion before training"
+      >
         <div className="overflow-hidden rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-slate-300">
@@ -1484,19 +1564,37 @@ const playerLoadHistory = last7Days.map((date) => {
             </thead>
             <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
               {todayWellness.map((p) => {
-                const tone = p.readiness == null ? "bg-slate-500" : p.readiness < 60 ? "bg-red-500" : p.readiness < 75 ? "bg-amber-400" : "bg-emerald-500";
+                const tone =
+                  p.readiness == null
+                    ? "bg-slate-500"
+                    : p.readiness < 60
+                      ? "bg-red-500"
+                      : p.readiness < 75
+                        ? "bg-amber-400"
+                        : "bg-emerald-500";
+
                 return (
-                  <tr key={p.id} className="cursor-pointer hover:bg-white/5" onClick={() => setHistoryPlayerId(p.id)}>
+                  <tr
+                    key={p.id}
+                    className="cursor-pointer hover:bg-white/5"
+                    onClick={() => setHistoryPlayerId(p.id)}
+                  >
                     <td className="px-4 py-3 font-medium">{p.name}</td>
                     <td className="px-4 py-3 text-slate-300">{p.position}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs">
                         <span className={cn("h-2.5 w-2.5 rounded-full", tone)} />
-                        {p.readiness ?? "--"}{p.readiness != null ? "%" : ""}
+                        {p.readiness ?? "--"}
+                        {p.readiness != null ? "%" : ""}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{p.sleep ?? "--"}{p.sleep != null ? "/5" : ""}</td>
-                    <td className="px-4 py-3 text-slate-300">{p.flags.length ? p.flags.slice(0, 2).join(", ") : "None"}</td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {p.sleep ?? "--"}
+                      {p.sleep != null ? "/5" : ""}
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {p.flags.length ? p.flags.slice(0, 2).join(", ") : "None"}
+                    </td>
                     <td className="px-4 py-3">{p.load7}</td>
                     <td className="px-4 py-3">{p.load15}</td>
                     <td className="px-4 py-3">{p.load30}</td>
@@ -1509,42 +1607,43 @@ const playerLoadHistory = last7Days.map((date) => {
           </table>
         </div>
       </SectionCard>
+
       <SectionCard
-  title="Wellness Details"
-  icon={HeartPulse}
-  subtitle="Full wellness breakdown for each player"
->
-  <div className="overflow-hidden rounded-3xl border border-white/10">
-    <table className="min-w-full divide-y divide-white/10 text-sm">
-      <thead className="bg-white/5 text-left text-slate-300">
-        <tr>
-          <th className="px-4 py-3">Player</th>
-          <th className="px-4 py-3">Sleep</th>
-          <th className="px-4 py-3">Fatigue</th>
-          <th className="px-4 py-3">Soreness</th>
-          <th className="px-4 py-3">Stress</th>
-          <th className="px-4 py-3">Mood</th>
-          <th className="px-4 py-3">Freshness</th>
-          <th className="px-4 py-3">Comment</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
-        {todayWellness.map((p) => (
-          <tr key={`wellness-${p.id}`}>
-            <td className="px-4 py-3 font-medium">{p.name}</td>
-            <td className="px-4 py-3">{p.sleep ?? "--"}</td>
-            <td className="px-4 py-3">{p.fatigue ?? "--"}</td>
-            <td className="px-4 py-3">{p.soreness ?? "--"}</td>
-            <td className="px-4 py-3">{p.stress ?? "--"}</td>
-            <td className="px-4 py-3">{p.mood ?? "--"}</td>
-            <td className="px-4 py-3">{p.freshness ?? "--"}</td>
-            <td className="px-4 py-3 text-slate-300">{p.comment || "—"}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</SectionCard>
+        title="Wellness Details"
+        icon={HeartPulse}
+        subtitle="Full wellness breakdown for each player"
+      >
+        <div className="overflow-hidden rounded-3xl border border-white/10">
+          <table className="min-w-full divide-y divide-white/10 text-sm">
+            <thead className="bg-white/5 text-left text-slate-300">
+              <tr>
+                <th className="px-4 py-3">Player</th>
+                <th className="px-4 py-3">Sleep</th>
+                <th className="px-4 py-3">Fatigue</th>
+                <th className="px-4 py-3">Soreness</th>
+                <th className="px-4 py-3">Stress</th>
+                <th className="px-4 py-3">Mood</th>
+                <th className="px-4 py-3">Freshness</th>
+                <th className="px-4 py-3">Comment</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/10 bg-slate-950/30 text-slate-100">
+              {todayWellness.map((p) => (
+                <tr key={`wellness-${p.id}`}>
+                  <td className="px-4 py-3 font-medium">{p.name}</td>
+                  <td className="px-4 py-3">{p.sleep ?? "--"}</td>
+                  <td className="px-4 py-3">{p.fatigue ?? "--"}</td>
+                  <td className="px-4 py-3">{p.soreness ?? "--"}</td>
+                  <td className="px-4 py-3">{p.stress ?? "--"}</td>
+                  <td className="px-4 py-3">{p.mood ?? "--"}</td>
+                  <td className="px-4 py-3">{p.freshness ?? "--"}</td>
+                  <td className="px-4 py-3 text-slate-300">{p.comment || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
     </div>
   );
 }
