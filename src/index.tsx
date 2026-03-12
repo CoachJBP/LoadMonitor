@@ -35,7 +35,18 @@ const DEFAULT_PLAYERS = [
   { id: 9, name: "S. Novak", position: "9" },
 ];
 
-const todayKey = () => new Date().toISOString().slice(0, 10);
+const todayKey = () => {
+  const now = new Date();
+
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Winnipeg",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(now)
+    .replace(/\//g, "-");
+};
 const daysAgoKey = (days) => {
   const d = new Date();
   d.setDate(d.getDate() - days);
