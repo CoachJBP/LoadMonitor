@@ -1234,10 +1234,25 @@ const playerLoadHistory = last7Days.map((date) => {
     targetLoad,
   };
 });
-  const readinessBars = todayWellness
-    .filter((p) => p.readiness !== null)
-    .map((p) => ({ name: p.name, readiness: p.readiness }))
-    .sort((a, b) => a.readiness - b.readiness);
+  const teamReadinessTrend = last7Days.map((date) => {
+  const dayWellness = wellnessEntries.filter((w) => w.date === date);
+
+  const readinessValues = dayWellness
+    .map((w) => scoreReadiness(w))
+    .filter((value) => value !== null);
+
+  const averageReadiness = readinessValues.length
+    ? Math.round(
+        readinessValues.reduce((sum, value) => sum + value, 0) /
+          readinessValues.length
+      )
+    : null;
+
+  return {
+    date,
+    averageReadiness,
+  };
+});
 
   return (
     <div className="grid gap-6">
@@ -1353,20 +1368,40 @@ const playerLoadHistory = last7Days.map((date) => {
           </div>
         </SectionCard>
 
-        <SectionCard title="Today readiness" icon={Moon} subtitle="Lowest to highest readiness scores">
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={readinessBars} layout="vertical" margin={{ left: 8, right: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis type="number" domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
-                <YAxis type="category" dataKey="name" stroke="#cbd5e1" width={72} fontSize={12} />
-                <Tooltip contentStyle={{ background: "#020617", border: "1px solid #334155", borderRadius: 16 }} />
-                <Bar dataKey="readiness" fill="#ffffff" radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </SectionCard>
-      </div>
+        <SectionCard
+  title="Team Average Readiness Trend"
+  icon={Moon}
+  subtitle="7-day window from selected date"
+>
+  <div className="h-72 w-full">
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={teamReadinessTrend}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+        <XAxis dataKey="date" stroke="#cbd5e1" fontSize={12} />
+        <YAxis domain={[0, 100]} stroke="#cbd5e1" fontSize={12} />
+        <Tooltip
+          contentStyle={{
+            background: "#020617",
+            border: "1px solid #334155",
+            borderRadius: 16,
+          }}
+          formatter={(value, name) => {
+            if (name === "averageReadiness") return [value, "Team Average Readiness"];
+            return [value, name];
+          }}
+        />
+        <Line
+          type="monotone"
+          dataKey="averageReadiness"
+          stroke="#34d399"
+          strokeWidth={3}
+          dot={{ r: 4 }}
+          connectNulls={false}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+</SectionCard>
 
       <SectionCard
   title="Selected Player Load History"
