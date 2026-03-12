@@ -642,7 +642,7 @@ setSessionEntries((prev) => {
         </div>
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-3xl border border-white/10">
+      <div className="mt-5 overflow-x-auto rounded-3xl border border-white/10">
         <table className="min-w-full divide-y divide-white/10 text-sm">
           <thead className="bg-white/5 text-left text-slate-300">
             <tr>
@@ -1285,7 +1285,7 @@ function StaffDashboard({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <StatCard
           label="Wellness completed"
           value={`${completedWellness}/${players.length}`}
@@ -1330,7 +1330,7 @@ function StaffDashboard({
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         {teamLoadCards.map((card) => (
           <StatCard
             key={card.label}
@@ -1386,7 +1386,7 @@ function StaffDashboard({
         </div>
       </SectionCard>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-6 grid-cols-1 xl:grid-cols-[1.2fr_0.8fr]">
         <SectionCard
           title="Planned vs Actual Load Trend"
           icon={BarChart3}
@@ -1404,7 +1404,7 @@ function StaffDashboard({
             </div>
           </div>
 
-          <div className="h-72 w-full">
+          <div className="h-64 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={loadByDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -1441,7 +1441,7 @@ function StaffDashboard({
           icon={Moon}
           subtitle="7-day window from selected date"
         >
-          <div className="h-72 w-full">
+          <div className="h-64 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={teamReadinessTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -1496,7 +1496,7 @@ function StaffDashboard({
           </div>
         </div>
 
-        <div className="h-72 w-full">
+        <div className="h-64 sm:h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={playerLoadHistory}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -1546,7 +1546,7 @@ function StaffDashboard({
         icon={Timer}
         subtitle="Simple traffic-light view for staff discussion before training"
       >
-        <div className="overflow-hidden rounded-3xl border border-white/10">
+        <div className="overflow-x-auto rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-slate-300">
               <tr>
@@ -1613,7 +1613,7 @@ function StaffDashboard({
         icon={HeartPulse}
         subtitle="Full wellness breakdown for each player"
       >
-        <div className="overflow-hidden rounded-3xl border border-white/10">
+        <div className="overflow-x-auto rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-slate-300">
               <tr>
@@ -1924,7 +1924,7 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
             </p>
           </div>
 
-          <div className="h-72 w-full">
+          <div className="h-64 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={playerLoadTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -1957,7 +1957,7 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
             </p>
           </div>
 
-          <div className="h-72 w-full">
+          <div className="h-64 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={playerReadinessTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -1985,7 +1985,7 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
-        <div className="overflow-hidden rounded-3xl border border-white/10">
+        <div className="overflow-x-auto rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-slate-300">
               <tr>
@@ -2006,7 +2006,7 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
           </table>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-white/10">
+        <div className="overflow-x-auto rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-slate-300">
               <tr>
