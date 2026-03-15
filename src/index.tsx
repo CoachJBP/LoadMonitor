@@ -2529,6 +2529,22 @@ if (!session) {
   setAuthLoadingAction(false);
 };
 
+  if (!players.length) {
+  return (
+    <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+        <p className="text-sm uppercase tracking-[0.25em] text-amber-300">
+          Bonivital SC
+        </p>
+        <h1 className="mt-2 text-2xl font-bold">Loading players...</h1>
+        <p className="mt-3 text-slate-300">
+          Please wait while the roster loads.
+        </p>
+      </div>
+    </div>
+  );
+}
+  
   return (
   <div className="min-h-screen bg-slate-900 text-white flex flex-col">
     <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
