@@ -2053,6 +2053,7 @@ const [authLoading, setAuthLoading] = useState(true);
 const [profileLoading, setProfileLoading] = useState(true);
   const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 const [loginError, setLoginError] = useState("");
 
   const [authMode, setAuthMode] = useState("login");
@@ -2408,9 +2409,16 @@ if (!session) {
   setAuthLoadingAction(false);
 };
 
-  const handleSignUp = async () => {
+ const handleSignUp = async () => {
   setLoginError("");
   setAuthSuccessMessage("");
+
+  // ✅ check confirm password
+  if (password !== confirmPassword) {
+    setLoginError("Passwords do not match");
+    return;
+  }
+
   setAuthLoadingAction(true);
 
   const { data, error } = await supabase.auth.signUp({
@@ -2557,6 +2565,14 @@ if (!session) {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full rounded-xl bg-slate-900 border border-white/10 p-2 text-white"
         />
+
+        <input
+  type="password"
+  placeholder="Confirm password"
+  value={confirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}
+  className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-white"
+/>
 
         <button
           onClick={authMode === "login" ? handleLogin : handleSignUp}
