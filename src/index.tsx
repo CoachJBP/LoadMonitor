@@ -550,9 +550,10 @@ if (data && data.length > 0) {
 </button>
           </div>
         )}
-      </SectionCard>
+            </SectionCard>
     </div>
-  );
+  </div>
+);
 }
 
 function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
