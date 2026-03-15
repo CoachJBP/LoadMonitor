@@ -392,6 +392,44 @@ if (data && data.length > 0) {
 };
 
   return (
+  <div className="grid gap-6">
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+            Daily Check-In Status
+          </p>
+          <p className="mt-1 text-sm text-slate-300">
+            {selectedPlayer.name} — today’s completion status
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <div
+            className={cn(
+              "rounded-2xl border px-4 py-3 text-sm font-semibold",
+              wellnessSubmitted
+                ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-200"
+                : "border-red-400/30 bg-red-500/20 text-red-200"
+            )}
+          >
+            Wellness: {wellnessSubmitted ? "Completed" : "Missing"}
+          </div>
+
+          <div
+            className={cn(
+              "rounded-2xl border px-4 py-3 text-sm font-semibold",
+              rpeSubmitted
+                ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-200"
+                : "border-red-400/30 bg-red-500/20 text-red-200"
+            )}
+          >
+            RPE: {rpeSubmitted ? "Completed" : "Missing"}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div className="grid gap-6 md:grid-cols-1 xl:grid-cols-2">
       <SectionCard
         title="Pre-Training Wellness"
