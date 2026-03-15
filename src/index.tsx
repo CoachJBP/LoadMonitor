@@ -563,6 +563,10 @@ function AdminSessionSetup({ players, sessionEntries, setSessionEntries }) {
   const [targetRpe, setTargetRpe] = useState(5);
   const [attendanceMap, setAttendanceMap] = useState({});
 
+  const sessionExists = sessionEntries.some(
+  (s) => s.date === sessionDate
+);
+
   useEffect(() => {
     const seeded = {};
     players.forEach((player) => {
@@ -674,10 +678,20 @@ setSessionEntries((prev) => {
     className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none"
   />
 </div>
+
+  {sessionExists && (
+  <div className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+    Session already exists for this date — updating will overwrite it
+  </div>
+)}
+        
         <div className="flex items-end">
-          <button onClick={saveSessionSetup} className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]">
-            Save session setup
-          </button>
+         <button
+  onClick={saveSessionSetup}
+  className="w-full rounded-2xl bg-white px-4 py-3 font-semibold text-slate-950 transition hover:scale-[1.01]"
+>
+  {sessionExists ? "Update existing session" : "Save session setup"}
+</button>
         </div>
       </div>
 
