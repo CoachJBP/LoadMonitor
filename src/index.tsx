@@ -2093,7 +2093,7 @@ function PlayerHistory({ selectedPlayer, wellnessEntries, sessionEntries }) {
 }
 export default function PlayerLoadMonitorApp() {
   const [mode, setMode] = useState("staff");
-  const [players, setPlayers] = useState(DEFAULT_PLAYERS);
+  const [players, setPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState(1);
   const [historyPlayerId, setHistoryPlayerId] = useState(1);
   const [wellnessEntries, setWellnessEntries] = useState(seedWellness);
