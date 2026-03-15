@@ -2258,10 +2258,11 @@ const handleExportRpe = () => {
 }, [session]);
   useEffect(() => {
   const loadPlayers = async () => {
-    const { data, error } = await supabase
-      .from("players")
-      .select("id, name, position, role")
-      .order("id", { ascending: true });
+  const { data, error } = await supabase
+    .from("players")
+    .select("id, name, position, role")
+    .eq("role", "player")
+    .order("id", { ascending: true });
 
     if (error) {
       console.error("LOAD PLAYERS ERROR:", error);
