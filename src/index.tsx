@@ -295,7 +295,12 @@ const [savingRpe, setSavingRpe] = useState(false);
   const isBlocked = ["Absent", "Off", "Not Selected"].includes(rpe.attendance);
   const today = todayKey();
 const wellnessSubmitted = wellnessEntries.some((x) => x.playerId === selectedPlayer.id && x.date === today);
-const rpeSubmitted = sessionEntries.some((x) => x.playerId === selectedPlayer.id && x.date === today);
+const rpeSubmitted = sessionEntries.some(
+  (x) =>
+    x.playerId === selectedPlayer.id &&
+    x.date === today &&
+    Number(x.rpe || 0) > 0
+);
 
  const saveWellness = async () => {
   if (savingWellness || wellnessSubmitted) return;
