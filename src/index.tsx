@@ -358,8 +358,6 @@ const saveRpe = async () => {
   setSavingRpe(true);
 
   const payload = {
-
-  const payload = {
     player_id: selectedPlayer.id,
     session_id: null,
     rpe: rpe.rpe,
