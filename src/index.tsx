@@ -266,6 +266,8 @@ function PlayerForm({
 }) {
   const [wellness, setWellness] = useState({ sleep: 4, fatigue: 2, soreness: 2, stress: 2, mood: 4, freshness: 4, comment: "" });
   const [rpe, setRpe] = useState({ duration: 0, rpe: 6, comment: "", bodyCheck: "None", painArea: "", attendance: "Present", sessionType: "Training" });
+  const [savingWellness, setSavingWellness] = useState(false);
+const [savingRpe, setSavingRpe] = useState(false);
 
   useEffect(() => {
     const today = todayKey();
@@ -296,7 +298,10 @@ const wellnessSubmitted = wellnessEntries.some((x) => x.playerId === selectedPla
 const rpeSubmitted = sessionEntries.some((x) => x.playerId === selectedPlayer.id && x.date === today);
 
  const saveWellness = async () => {
-   if (wellnessSubmitted) return;
+  if (savingWellness || wellnessSubmitted) return;
+
+  setSavingWellness(true);
+
   const today = todayKey();
 
   const payload = {
@@ -316,10 +321,11 @@ const rpeSubmitted = sessionEntries.some((x) => x.playerId === selectedPlayer.id
     .insert([payload])
     .select();
 
-  if (error) {
-    console.error("SAVE WELLNESS ERROR:", error);
-    return;
-  }
+ if (error) {
+  console.error("SAVE WELLNESS ERROR:", error);
+  setSavingWellness(false);
+  return;
+}
 
   console.log("SAVE WELLNESS OK:", data);
 
@@ -342,11 +348,16 @@ if (data && data.length > 0) {
   ]);
 }
 await loadWellnessEntries();
+setSavingWellness(false);
 };
 
-  const saveRpe = async () => {
-     if (rpeSubmitted) return;
+const saveRpe = async () => {
+  if (savingRpe || rpeSubmitted) return;
   if (isBlocked) return;
+
+  setSavingRpe(true);
+
+  const payload = {
 
   const payload = {
     player_id: selectedPlayer.id,
@@ -362,10 +373,11 @@ await loadWellnessEntries();
     .insert([payload])
     .select();
 
-  if (error) {
-    console.error("SAVE RPE ERROR:", error);
-    return;
-  }
+ if (error) {
+  console.error("SAVE RPE ERROR:", error);
+  setSavingRpe(false);
+  return;
+}
 
   console.log("SAVE RPE OK:", data);
 
@@ -389,6 +401,7 @@ if (data && data.length > 0) {
   ]);
 }
     await loadRpeEntries();
+setSavingRpe(false);
 };
 
   return (
@@ -452,15 +465,19 @@ if (data && data.length > 0) {
           />
           <button
   onClick={saveWellness}
-  disabled={wellnessSubmitted}
+  disabled={savingWellness || wellnessSubmitted}
   className={cn(
     "rounded-2xl px-4 py-4 font-semibold transition",
-    wellnessSubmitted
+    savingWellness || wellnessSubmitted
       ? "cursor-not-allowed bg-slate-700 text-slate-300"
       : "bg-white text-slate-950 hover:scale-[1.01]"
   )}
 >
-  {wellnessSubmitted ? "Wellness already submitted" : "Save wellness check"}
+  {savingWellness
+    ? "Saving..."
+    : wellnessSubmitted
+      ? "Saved ✅"
+      : "Save wellness check"}
 </button>
         </div>
       </SectionCard>
@@ -538,15 +555,19 @@ if (data && data.length > 0) {
             />
             <button
   onClick={saveRpe}
-  disabled={rpeSubmitted}
+  disabled={savingRpe || rpeSubmitted}
   className={cn(
     "rounded-2xl px-4 py-4 font-semibold transition",
-    rpeSubmitted
+    savingRpe || rpeSubmitted
       ? "cursor-not-allowed bg-slate-700 text-slate-300"
       : "bg-amber-300 text-slate-950 hover:scale-[1.01]"
   )}
 >
-  {rpeSubmitted ? "RPE already submitted" : "Save RPE entry"}
+  {savingRpe
+    ? "Saving..."
+    : rpeSubmitted
+      ? "Saved ✅"
+      : "Save RPE entry"}
 </button>
           </div>
         )}
