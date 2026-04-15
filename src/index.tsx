@@ -1175,14 +1175,18 @@ function StaffDashboard({
       ? Math.round(totalLoadSum / submittedSessions.length)
       : 0;
 
-    const plannedSum = daySessions.reduce(
-      (sum, s) => sum + Number(s.plannedLoad || 0),
-      0
-    );
+    const activePlannedSessions = daySessions.filter(
+  (s) => Number(s.plannedLoad || 0) > 0
+);
 
-    const plannedLoad = daySessions.length
-      ? Math.round(plannedSum / daySessions.length)
-      : 0;
+const plannedSum = activePlannedSessions.reduce(
+  (sum, s) => sum + Number(s.plannedLoad || 0),
+  0
+);
+
+const plannedLoad = activePlannedSessions.length
+  ? Math.round(plannedSum / activePlannedSessions.length)
+  : 0;
 
     const diff = totalLoad - plannedLoad;
 
