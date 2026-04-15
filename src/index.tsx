@@ -1432,6 +1432,28 @@ function StaffDashboard({
         icon={BarChart3}
         subtitle="7-day overview up to selected date"
       >
+        <div className="mb-3 flex flex-wrap gap-3 text-xs">
+  <div className="flex items-center gap-2">
+    <span className="h-2 w-2 rounded-full bg-red-500"></span>
+    <span>+100 Too hard</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="h-2 w-2 rounded-full bg-amber-400"></span>
+    <span>+30 → +100 Overload</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="h-2 w-2 rounded-full bg-white"></span>
+    <span>OK</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="h-2 w-2 rounded-full bg-emerald-300"></span>
+    <span>Underload</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+    <span>Too light</span>
+  </div>
+</div>
         <div className="overflow-x-auto rounded-3xl border border-white/10">
           <table className="min-w-full divide-y divide-white/10 text-sm">
             <thead className="bg-white/5 text-left text-slate-300">
