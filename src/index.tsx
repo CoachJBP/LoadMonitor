@@ -1161,44 +1161,47 @@ function StaffDashboard({
   const last4Days = last7Days.slice(-4);
 
   const microcycleData = last7Days.map((date) => {
-    const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
-    const daySessions = sessionEntries.filter((s) => s.date === date);
+  const wellnessCount = wellnessEntries.filter((w) => w.date === date).length;
+  const daySessions = sessionEntries.filter((s) => s.date === date);
 
-    const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
+  const sessionLength =
+    daySessions.find((s) => Number(s.duration || 0) > 0)?.duration || 0;
 
-    const totalLoadSum = submittedSessions.reduce(
-      (sum, s) => sum + Number(s.load || 0),
-      0
-    );
+  const submittedSessions = daySessions.filter((s) => Number(s.rpe || 0) > 0);
 
-    const totalLoad = submittedSessions.length
-      ? Math.round(totalLoadSum / submittedSessions.length)
-      : 0;
+  const totalLoadSum = submittedSessions.reduce(
+    (sum, s) => sum + Number(s.load || 0),
+    0
+  );
 
-    const activePlannedSessions = daySessions.filter(
-  (s) => Number(s.plannedLoad || 0) > 0
-);
+  const totalLoad = submittedSessions.length
+    ? Math.round(totalLoadSum / submittedSessions.length)
+    : 0;
 
-const plannedSum = activePlannedSessions.reduce(
-  (sum, s) => sum + Number(s.plannedLoad || 0),
-  0
-);
+  const activePlannedSessions = daySessions.filter(
+    (s) => Number(s.plannedLoad || 0) > 0
+  );
 
-const plannedLoad = activePlannedSessions.length
-  ? Math.round(plannedSum / activePlannedSessions.length)
-  : 0;
+  const plannedSum = activePlannedSessions.reduce(
+    (sum, s) => sum + Number(s.plannedLoad || 0),
+    0
+  );
 
-    const diff = totalLoad - plannedLoad;
+  const plannedLoad = activePlannedSessions.length
+    ? Math.round(plannedSum / activePlannedSessions.length)
+    : 0;
 
-    return {
-      date,
-      wellnessCount,
-      totalLoad,
-      plannedLoad,
-      diff,
-    };
-  });
+  const diff = totalLoad - plannedLoad;
 
+  return {
+    date,
+    wellnessCount,
+    sessionLength,
+    totalLoad,
+    plannedLoad,
+    diff,
+  };
+});
   const todayWellness = players.map((p) => {
     const entry = wellnessEntries.find((w) => w.playerId === p.id && w.date === today);
     const todaySession = sessionEntries.find((s) => s.playerId === p.id && s.date === today);
