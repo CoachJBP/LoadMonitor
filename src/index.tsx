@@ -1438,6 +1438,7 @@ function StaffDashboard({
               <tr>
                 <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Wellness Forms</th>
+<th className="px-4 py-3">Session Length</th>
                 <th className="px-4 py-3">Planned Load</th>
                 <th className="px-4 py-3">Actual Load</th>
                 <th className="px-4 py-3">Diff</th>
@@ -1448,6 +1449,9 @@ function StaffDashboard({
                 <tr key={day.date}>
                   <td className="px-4 py-3">{day.date}</td>
                   <td className="px-4 py-3">{day.wellnessCount}</td>
+                  <td className="px-4 py-3">
+  {day.sessionLength ? `${day.sessionLength} min` : "-"}
+</td>
                   <td className="px-4 py-3 text-red-300">{day.plannedLoad}</td>
                   <td className="px-4 py-3">{day.totalLoad}</td>
                   <td className="px-4 py-3">
